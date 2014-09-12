@@ -1,0 +1,3 @@
+#!/bin/bash
+cd PyGithub
+exec bash --rcfile env/bin/activate -i
