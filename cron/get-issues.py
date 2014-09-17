@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import code
 import getpass
+import re
 import readline
 import sys
 import traceback
@@ -12,17 +13,50 @@ password = getpass.getpass('Password for %s: ' % username)
 reponame = 'pagekite/Mailpile'
 
 
+TEMPLATES = {
+    'markdown': {
+        'issue': '%(indent)s* [%(text)s](%(url)s)',
+        'label': '%(indent)s* %(text)s',
+        'stone': '%(indent)s* %(text)s',
+        'issues': '%(lines)s',
+        'labels': '%(lines)s',
+        'stones': '%(lines)s'
+    },
+    'html': {
+        'issue': '%(indent)s<li class="%(classes)s"><a href="%(url)s">%(text)s</a></li>',
+        'label': '%(indent)s<li class="%(classes)s">%(text)s</li>',
+        'stone': '%(indent)s<li class="%(classes)s">%(text)s</li>',
+        'issues': '%(indent)s<ul class="%(classes)s">\n%(lines)s\n%(indent)s</ul>',
+        'labels': '%(indent)s<ul class="%(classes)s">\n%(lines)s\n%(indent)s</ul>',
+        'stones': '%(indent)s<ul class="%(classes)s">\n%(lines)s\n%(indent)s</ul>'
+    }
+}
+
+
+RE_HTML_CLASS_ILLEGAL = re.compile('[^a-z0-9_-]+')
+
+def html_class(text):
+    return re.sub(RE_HTML_CLASS_ILLEGAL, '_', text.lower())
+
+
 def safe_print(text):
     print text.encode('utf-8')
 
 
-def print_issues_markdown(issues, indent=''):
+def issue_list(template, issues, indent=''):
+    lines = []
     issues.sort(key=lambda i: i.title)
     for i in issues:
-        safe_print('%s* [%s](%s)' % (indent, i.title, i.html_url))
+        lines.append(template['issue'] % {
+           'indent': indent,
+           'classes': 'issue',
+           'text': i.title,
+           'url': i.html_url
+        })
+    return lines
 
 
-def print_labels_markdown(issues, indent=''):
+def label_list(template, issues, indent=''):
     by_label = {}
     for i in issues:
         for label in i.labels:
@@ -30,13 +64,24 @@ def print_labels_markdown(issues, indent=''):
                 by_label[label.name] = (label, [])
             by_label[label.name][1].append(i)
 
+    lines = []
     for lname in sorted(by_label.keys()):
         label, issues = by_label[lname]
-        safe_print('%s* %s' % (indent, lname))
-        print_issues_markdown(issues, indent=indent+'   ')
+        text = lname + ' ' + template['issues'] % {
+            'indent': indent,
+            'classes': 'issues',
+            'lines': '\n'.join(issue_list(template, issues,
+                                          indent=indent+'   '))
+        }
+        lines.append(template['label'] % {
+            'indent': indent,
+            'classes': 'label label-%s' % html_class(lname),
+            'text': text
+        })
+    return lines 
 
 
-def print_roadmap_markdown(issues, indent=''):
+def milestone_list(template, issues, indent=''):
     by_milestone = {}
     for i in issues:
         milestone = i.milestone
@@ -45,10 +90,21 @@ def print_roadmap_markdown(issues, indent=''):
             by_milestone[mname] = (milestone, [])
         by_milestone[mname][1].append(i)
 
+    lines = []
     for mname in sorted(by_milestone.keys()):
         milestone, issues = by_milestone[mname]
-        safe_print('%s* %s' % (indent, mname))
-        print_labels_markdown(issues, indent=indent+'   ')
+        text = mname + ' ' + template['labels'] % {
+            'indent': indent,
+            'classes': 'labels',
+            'lines': '\n'.join(label_list(template, issues,
+                                          indent=indent+'   '))
+        }
+        lines.append(template['stone'] % {
+            'indent': indent,
+            'classes': 'milestone milestone-%s' % html_class(mname),
+            'text': text
+        })
+    return lines
 
 
 def run_shell():
@@ -60,6 +116,11 @@ try:
     gh = PyGithub.BlockingBuilder().Login(username, password).Build()
     repo = gh.get_repo(reponame)
 
+    if '--html' in sys.argv:
+        template = TEMPLATES['html']
+    else:
+        template = TEMPLATES['markdown']
+
     if '--all' in sys.argv:
         issues = repo.get_issues()
     elif '--closed' in sys.argv:
@@ -69,15 +130,15 @@ try:
 
     if '--issues' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        print_issues_markdown(issues)
+        safe_print('\n'.join(issue_list(template, issues)))
 
     if '--labels' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        print_labels_markdown(issues)
+        safe_print('\n'.join(label_list(template, issues)))
 
     if '--roadmap' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        print_roadmap_markdown(issues)
+        safe_print('\n'.join(milestone_list(template, issues)))
 
     if '-i' in sys.argv:
         run_shell()
