@@ -16,7 +16,7 @@ import os
 import json
 import sys
 
-JSON_HOME = '/tmp/json-data/'
+JSON_HOME = '/home/mailpile/mvuserdb/'
 
 try:
     assert(os.getenv('REQUEST_METHOD') == 'POST')
