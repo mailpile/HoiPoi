@@ -23,12 +23,29 @@ TEMPLATES = {
         'stones': '%(lines)s'
     },
     'html': {
-        'issue': '%(indent)s<li class="%(classes)s"><a href="%(url)s">%(text)s</a></li>',
-        'label': '%(indent)s<li class="%(classes)s">%(text)s</li>',
-        'stone': '%(indent)s<li class="%(classes)s">%(text)s</li>',
-        'issues': '%(indent)s<ul class="%(classes)s">\n%(lines)s\n%(indent)s</ul>',
-        'labels': '%(indent)s<ul class="%(classes)s">\n%(lines)s\n%(indent)s</ul>',
-        'stones': '%(indent)s<ul class="%(classes)s">\n%(lines)s\n%(indent)s</ul>'
+        'issue': ('%(indent)s<li class="issue %(classes)s">'
+                  '<a href="%(url)s">%(text)s</a></li>'),
+        'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
+        'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
+        'issues': ('%(indent)s<ul class="issues %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>'),
+        'labels': ('%(indent)s<ul class="labels %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>'),
+        'stones': ('%(indent)s<ul class="milestones %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>')
+    },
+    'mvuserdbwv': {
+        'issue': ('%(indent)s'
+                  '<li class="issue %(classes)s" data-issue="%(number)s">'
+                  '<a href="%(url)s">%(text)s</a></li>'),
+        'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
+        'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
+        'issues': ('%(indent)s<ul class="issues %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>'),
+        'labels': ('%(indent)s<ul class="labels %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>'),
+        'stones': ('%(indent)s<ul class="milestones vote-list %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>')
     }
 }
 
@@ -43,20 +60,29 @@ def safe_print(text):
     print text.encode('utf-8')
 
 
-def issue_list(template, issues, indent=''):
+def issue_lines(template, issues, indent=''):
     lines = []
     issues.sort(key=lambda i: i.title)
     for i in issues:
         lines.append(template['issue'] % {
            'indent': indent,
-           'classes': 'issue',
+           'classes': '', # FIXME: Add all the labels as classes?
+           'number': i.number,
            'text': i.title,
            'url': i.html_url
         })
     return lines
 
 
-def label_list(template, issues, indent=''):
+def issue_list(template, issues, indent=''):
+    return template['issues'] % {
+        'indent': indent,
+        'classes': '',
+        'lines': '\n'.join(issue_lines(template, issues, indent=indent+'   '))
+    }
+
+
+def label_lines(template, issues, indent=''):
     by_label = {}
     for i in issues:
         for label in i.labels:
@@ -67,21 +93,24 @@ def label_list(template, issues, indent=''):
     lines = []
     for lname in sorted(by_label.keys()):
         label, issues = by_label[lname]
-        text = lname + ' ' + template['issues'] % {
-            'indent': indent,
-            'classes': 'issues',
-            'lines': '\n'.join(issue_list(template, issues,
-                                          indent=indent+'   '))
-        }
+        text = lname + ' ' + issue_list(template, issues, indent=indent)
         lines.append(template['label'] % {
             'indent': indent,
-            'classes': 'label label-%s' % html_class(lname),
+            'classes': 'label-%s' % html_class(lname),
             'text': text
         })
-    return lines 
+    return lines
 
 
-def milestone_list(template, issues, indent=''):
+def label_list(template, issues, indent=''):
+    return template['labels'] % {
+        'indent': indent,
+        'classes': '',
+        'lines': '\n'.join(label_lines(template, issues, indent=indent+'   '))
+    }
+
+
+def milestone_lines(template, issues, indent=''):
     by_milestone = {}
     for i in issues:
         milestone = i.milestone
@@ -93,18 +122,22 @@ def milestone_list(template, issues, indent=''):
     lines = []
     for mname in sorted(by_milestone.keys()):
         milestone, issues = by_milestone[mname]
-        text = mname + ' ' + template['labels'] % {
-            'indent': indent,
-            'classes': 'labels',
-            'lines': '\n'.join(label_list(template, issues,
-                                          indent=indent+'   '))
-        }
+        text = mname + ' ' + label_list(template, issues, indent=indent)
         lines.append(template['stone'] % {
             'indent': indent,
-            'classes': 'milestone milestone-%s' % html_class(mname),
+            'classes': 'milestone-%s' % html_class(mname),
             'text': text
         })
     return lines
+
+
+def milestone_list(template, issues, indent=''):
+    return template['stones'] % {
+        'indent': indent,
+        'classes': '',
+        'lines': '\n'.join(milestone_lines(template, issues,
+                                           indent=indent+'   '))
+    }
 
 
 def run_shell():
@@ -116,10 +149,10 @@ try:
     gh = PyGithub.BlockingBuilder().Login(username, password).Build()
     repo = gh.get_repo(reponame)
 
-    if '--html' in sys.argv:
-        template = TEMPLATES['html']
-    else:
-        template = TEMPLATES['markdown']
+    template = TEMPLATES['markdown']
+    for tid, tpl in TEMPLATES.iteritems():
+        if '--%s' % tid in sys.argv:
+            template = tpl
 
     if '--all' in sys.argv:
         issues = repo.get_issues()
@@ -130,15 +163,15 @@ try:
 
     if '--issues' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        safe_print('\n'.join(issue_list(template, issues)))
+        safe_print(issue_list(template, issues))
 
     if '--labels' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        safe_print('\n'.join(label_list(template, issues)))
+        safe_print(label_list(template, issues))
 
     if '--roadmap' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        safe_print('\n'.join(milestone_list(template, issues)))
+        safe_print(milestone_list(template, issues))
 
     if '-i' in sys.argv:
         run_shell()
