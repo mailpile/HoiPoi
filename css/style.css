@@ -53,10 +53,21 @@ body {
 .issue .issue-details {
 }
 
-.issue .voteup {
+.issue .vote {
+	background-color: #999;
+	padding: 10px;
+	float: right;
+	clear: both;
+	display: none;
+}
+
+.issue .vote .selected {
+	background-color: #9f9;
+}
+
+.issue .vote .up {
 
 }
 
-.issue .votedown {
-	
+.issue .vote .down {
 }

@@ -13,15 +13,15 @@
 		<ul>
 			<li><a href="/open.html">Open votes</a></li>
 			<li><a href="/closed.html">Closed votes</a></li>
+			<div class="login-box">
+				<input id="login-username"/>
+				<input type="password" id="login-password"/>
+				<button id="login-button">Log in</button>
+			</div>
+			<div class="logout-box">
+				<button id="logout-button">Log out</button>
+			</div>
 		</ul>
-		<div class="login-box">
-			<input id="login-username"/>
-			<input id="login-password"/>
-			<button id="login-button">Log in</button>
-		</div>
-		<div class="logout-box">
-			<button id="logout-button">Log out</button>
-		</div>
 	</div>
 
 	<div class="vote-list">
@@ -29,8 +29,8 @@
 		<div class="issue">
 			<div class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</div>
 			<div class="issue-details">...</div>
-			<a class="voteup" data-issue="30201" data-value="1">Yes</a>
-			<a class="votedown" data-issue="30201" data-value="-1">No</a>
+			<a class="vote up" data-issue="30201" data-value="1">Yes</a>
+			<a class="vote down" data-issue="30201" data-value="-1">No</a>
 		</div>
 
 
