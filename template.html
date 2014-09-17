@@ -1,0 +1,40 @@
+<html>
+<head>
+	<title>...</title>
+	<link rel="stylesheet" href="style.css"/>
+	<script src="jquery.js"></script>
+	<script src="jquery.cookie.js"></script>
+	<script src="sha256.js"></script>
+	<script src="votes.js"></script>
+</head>
+<body>
+	<div class="header-bar">
+		<div id="mailpile-logo"></div>
+		<ul>
+			<li><a href="/open.html">Open votes</a></li>
+			<li><a href="/closed.html">Closed votes</a></li>
+		</ul>
+		<div class="login-box">
+			<input id="login-username"/>
+			<input id="login-password"/>
+			<button id="login-button">Log in</button>
+		</div>
+		<div class="logout-box">
+			<button id="logout-button">Log out</button>
+		</div>
+	</div>
+
+	<div class="vote-list">
+
+		<div class="issue">
+			<div class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</div>
+			<div class="issue-details">...</div>
+			<a class="voteup" data-issue="30201" data-value="1">Yes</a>
+			<a class="votedown" data-issue="30201" data-value="-1">No</a>
+		</div>
+
+
+	</div>
+
+</body>
+</html>
