@@ -46,8 +46,22 @@ votes = {
 	},
 
 	cast_vote: function(issue, vote) {
-		$.getJSON("/vote", params, callback);
+		userinfo["vote."+ issue] = vote;
+		votes.update_path("vote." + issue, vote);
 	},
+
+	update_path: function(key, value) {
+		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-up.py", {key: value}, function() {
+			// pass
+		});
+	}
+
+	set_path: function(username, password) {
+		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-mv.py", {}, function() {
+
+		});
+	}
+
 
 	warning: function(msg) {
 		alert(msg);
