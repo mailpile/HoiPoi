@@ -27,8 +27,8 @@ try:
     json_old_path = os.path.join(JSON_HOME, json_old)
     json_new_path = os.path.join(JSON_HOME, json_new)
 
-    assert(os.exists(json_old_path))
-    assert(not os.exists(json_new_path))
+    assert(os.path.exists(json_old_path))
+    assert(not os.path.exists(json_new_path))
     os.rename(json_old_path, json_new_path)
 
     print 'Content-type: application/json'
