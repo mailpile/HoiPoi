@@ -35,7 +35,7 @@ try:
 
     print 'Content-type: application/json'
     print
-    print '%s' % data
+    print '%s' % json.dumps(data)
 
 except:
     import traceback
