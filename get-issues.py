@@ -12,10 +12,14 @@ password = getpass.getpass('Password for %s: ' % username)
 reponame = 'pagekite/Mailpile'
 
 
+def safe_print(text):
+    print text.encode('utf-8')
+
+
 def print_issues_markdown(issues, indent=''):
     issues.sort(key=lambda i: i.title)
     for i in issues:
-        print '%s* [%s](%s)' % (indent, i.title, i.url)
+        safe_print('%s* [%s](%s)' % (indent, i.title, i.html_url))
 
 
 def print_labels_markdown(issues, indent=''):
@@ -28,7 +32,7 @@ def print_labels_markdown(issues, indent=''):
 
     for lname in sorted(by_label.keys()):
         label, issues = by_label[lname]
-        print '%s* [%s](%s)' % (indent, lname, label.url)
+        safe_print('%s* %s' % (indent, lname))
         print_issues_markdown(issues, indent=indent+'   ')
 
 
@@ -43,10 +47,7 @@ def print_roadmap_markdown(issues, indent=''):
 
     for mname in sorted(by_milestone.keys()):
         milestone, issues = by_milestone[mname]
-        if milestone:
-            print '%s* [%s](%s)' % (indent, mname, milestone.url)
-        else:
-            print '%s* %s' % (indent, mname)
+        safe_print('%s* %s' % (indent, mname))
         print_labels_markdown(issues, indent=indent+'   ')
 
 
