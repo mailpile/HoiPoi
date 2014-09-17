@@ -34,7 +34,7 @@ votes = {
 		var token = Sha256.hash(username + ":" + password);
 		votes.token = token;
 		votes.username = username;
-		$.getJSON("mvuserdb/" + username + "." + token + ".json", function(data) {
+		$.getJSON("mvuserdb/" + votes.jsonpath(), function(data) {
 			if (data) {
 				votes.userinfo = data;
 				$.cookie("username", username);
@@ -58,9 +58,15 @@ votes = {
 		votes.update_path("vote." + issue, vote);
 	},
 
+	jsonpath: function() {
+		return votes.username + "." + votes.token + ".json";
+	},
+
 	update_path: function(key, value) {
 		votes.userinfo[key] = value;
-		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-up.py", {key: value}, function(data) {
+		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-up.py", 
+			{json: votes.jsonpath(), variable: key, value: value},
+			 function(data) {
 			// pass
 		});
 	},
