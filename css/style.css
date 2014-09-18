@@ -58,7 +58,7 @@ body {
 	padding: 10px;
 	float: right;
 	clear: both;
-	display: none;
+	/* display: none; */
 }
 
 .issue .vote .selected {

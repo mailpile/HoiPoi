@@ -8,6 +8,7 @@ votes = {
 		if ($.cookie("token")) {
 			// Refresh the cookie
 			$.cookie("token", $.cookie("token"), {expires: 10});
+			votes.create_votebuttons();
 			$(".vote").show();
 		}
 
@@ -20,13 +21,6 @@ votes = {
 		$("#login-button").click(function() {
 			votes.logout();
 		});
-
-		$(".vote").click(function(e) {
-			var issue = $(e.target).data("issue");
-			var value = $(e.target).data("value");
-			votes.cast_vote(issue, value);
-		});
-
 	},
 
 	login: function(username, password) {
@@ -44,6 +38,35 @@ votes = {
 			} else {
 				votes.warning("Invalid user name or password");
 			}
+		});
+
+		votes.create_votebuttons();
+	},
+
+	create_votebuttons: function() {
+		$(".issue").each(function(i, e) {
+			var m = $(e);
+			var issue = m.data("issue");
+			var options = (m.data("options") || "yes,no").split(",");
+			for (o in options) {
+				var val = options[o];
+				m.append("<a class=\"vote\" data-issue=\"" + issue + "\" data-value=\"" + val + "\">" + val + "</a>");
+			}
+		});
+
+		for (i in votes.userinfo) {
+			if (i.indexOf("vote") == 0) {
+				matchers =   "data-issue=" + issue;
+				$(".vote["+matchers).removeClass("selected");
+				matchers += ",data-value=" + votes.userinfo[i];
+				$(".vote["+matchers).addClass("selected");
+			}
+		}
+
+		$(".vote").click(function(e) {
+			var issue = $(e.target).data("issue");
+			var value = $(e.target).data("value");
+			votes.cast_vote(issue, value);
 		});
 	},
 
@@ -66,14 +89,17 @@ votes = {
 		votes.userinfo[key] = value;
 		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-up.py", 
 			{json: votes.jsonpath(), variable: key, value: value},
-			 function(data) {
-			// pass
-		});
+			function(data) {
+				// pass
+			}
+		);
 	},
 
 	set_path: function(username, password) {
-		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-mv.py", {}, function() {
+		$.getJSON("https://www.mailpile.is/cgi-bin/mailpile/user-mv.py", {}, function(data) {
+			if (data) {
 
+			}
 		});
 	},
 
