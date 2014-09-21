@@ -21,6 +21,16 @@ hoipoi = (function() {
         return $.cookie(name);
     };
 
+    var _cache_bust = function(url) {
+        var ts = (new Date()).getTime();
+        if (url.indexOf("?") < 0) {
+            return url + '?_cts=' + ts;
+        }
+        else {
+            return url + '&_cts=' + ts;
+        }
+    };
+
     return {
         site_info: {
             // Default settings...
@@ -115,7 +125,7 @@ hoipoi = (function() {
 
         _load_userinfo: function() {
             $.ajax({
-                url: this.site_info.url_db + this.json_path(),
+                url: _cache_bust(this.site_info.url_db + this.json_path()),
                 type: 'GET',
                 dataType: 'json',
                 success: this._login_succeeded,
