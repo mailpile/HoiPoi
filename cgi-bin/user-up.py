@@ -30,7 +30,7 @@ try:
     json_path = os.path.join(JSON_HOME, json_file)
 
     data = json.load(open(json_path, 'r'))
-    if value not in ('', None):
+    if value not in ('', 'None', None):
        data[variable] = value
     elif variable in data:
        del data[variable]

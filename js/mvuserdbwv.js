@@ -59,7 +59,7 @@ mvuserdbwv = (function() {
             }
         },
 
-        _json_path: function(username, token) {
+        json_path: function(username, token) {
             return ((username || this.username) + "." +
                     (token || this.token) + ".json");
         },
@@ -70,6 +70,7 @@ mvuserdbwv = (function() {
         },
 
         _clear_userinfo: function() {
+            $(mvuserdbwv.site_info.dom_login + " .password").val('');
             mvuserdbwv.token = null;
             mvuserdbwv.username = null;
             mvuserdbwv.userinfo = {};
@@ -97,7 +98,7 @@ mvuserdbwv = (function() {
 
         _load_userinfo: function() {
             $.ajax({
-                url: this.site_info.url_db + this._json_path(),
+                url: this.site_info.url_db + this.json_path(),
                 type: 'GET',
                 dataType: 'json',
                 success: this._login_succeeded,
@@ -107,17 +108,17 @@ mvuserdbwv = (function() {
 
         login: function(username, password) {
             var token = Sha256.hash(username + ":" + password);
-            mvuserdbwv.token = token;
-            mvuserdbwv.username = username;
-            mvuserdbwv._load_userinfo();
+            this.token = token;
+            this.username = username;
+            this._load_userinfo();
         },
 
         logout: function(username, password) {
-            $(mvuserdbwv.site_info.dom_logout).hide();
-            $(mvuserdbwv.site_info.dom_login).show();
-            $(mvuserdbwv.site_info.dom_login_error).hide();
-            mvuserdbwv._clear_userinfo();
-            mvuserdbwv._clear_cookies();
+            $(this.site_info.dom_logout).hide();
+            $(this.site_info.dom_login).show();
+            $(this.site_info.dom_login_error).hide();
+            this._clear_userinfo();
+            this._clear_cookies();
         },
 
         user_set: function(variable, value, ok, fail) {
@@ -125,7 +126,7 @@ mvuserdbwv = (function() {
                 url: this.site_info.url_up,
                 type: 'POST',
                 data: {
-                    json: this._json_path(),
+                    json: this.json_path(),
                     variable: variable,
                     value: value
                 },
@@ -144,8 +145,8 @@ mvuserdbwv = (function() {
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    oldjson: this._json_path(),
-                    newjson: this._json_path(username, token)
+                    oldjson: this.json_path(),
+                    newjson: this.json_path(username, token)
                 },
                 success: function(userdata) {
                     $(mvuserdbwv.site_info.dom_login + " .username"
