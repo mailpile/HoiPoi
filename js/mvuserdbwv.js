@@ -4,6 +4,23 @@
  * display and register votes on whatever.
  */
 mvuserdbwv = (function() {
+
+    // Magic cookies that can also come from URL hash parts!
+    var _hashbrownie = function(name) {
+        var hash = "&" + (document.location.hash || '#').substring(1);
+        var find = "&" + name + "=";
+        var where = hash.indexOf(find);
+        if (where >= 0) {
+            var val = hash.substring(where + find.length);
+            where = val.indexOf("&");
+            if (where >= 0) {
+                return val.substring(0, where);
+            }
+            return val;
+        }
+        return $.cookie(name);
+    };
+
     return {
         site_info: {
             // Default settings...
@@ -28,8 +45,8 @@ mvuserdbwv = (function() {
             if (site_info) {
                 this.site_info = site_info;
             }
-            this.username = $.cookie(mvuserdbwv.site_info.cookie_user);
-            this.token = $.cookie(mvuserdbwv.site_info.cookie_token);
+            this.username = _hashbrownie(mvuserdbwv.site_info.cookie_user);
+            this.token = _hashbrownie(mvuserdbwv.site_info.cookie_token);
 
             // Set some common DOM elements
             $(this.site_info.dom_login + " .username").val(this.username);
