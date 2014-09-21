@@ -3,7 +3,7 @@
  * This drops into pretty much any HTML page and can be configured to
  * display and register votes on whatever.
  */
-mvuserdbwv = (function() {
+hoipoi = (function() {
 
     // Magic cookies that can also come from URL hash parts!
     var _hashbrownie = function(name) {
@@ -24,7 +24,7 @@ mvuserdbwv = (function() {
     return {
         site_info: {
             // Default settings...
-            url_db: "/mvuserdbwv/db/",       // Directory of user json
+            url_db: "/hoipoi/db/",       // Directory of user json
             url_up: "/cgi-bin/user-up.py",   // Path to update CGI script
             url_mv: "/cgi-bin/user-mv.py",   // Path to moving CGI script
             dom_login: ".login-form",        // Selector for login form
@@ -45,8 +45,8 @@ mvuserdbwv = (function() {
             if (site_info) {
                 this.site_info = site_info;
             }
-            this.username = _hashbrownie(mvuserdbwv.site_info.cookie_user);
-            this.token = _hashbrownie(mvuserdbwv.site_info.cookie_token);
+            this.username = _hashbrownie(hoipoi.site_info.cookie_user);
+            this.token = _hashbrownie(hoipoi.site_info.cookie_token);
 
             // Set some common DOM elements
             $(this.site_info.dom_login + " .username").val(this.username);
@@ -54,13 +54,13 @@ mvuserdbwv = (function() {
 
             // Set our form handlers
             $(this.site_info.dom_login + " button").click(function() {
-                var u = $(mvuserdbwv.site_info.dom_login + " .username").val();
-                var p = $(mvuserdbwv.site_info.dom_login + " .password").val();
-                mvuserdbwv.login(u, p);
+                var u = $(hoipoi.site_info.dom_login + " .username").val();
+                var p = $(hoipoi.site_info.dom_login + " .password").val();
+                hoipoi.login(u, p);
                 return false;
             });
             $(this.site_info.dom_logout + " button").click(function() {
-                mvuserdbwv.logout();
+                hoipoi.logout();
                 return false;
             });
 
@@ -82,35 +82,35 @@ mvuserdbwv = (function() {
         },
 
         _clear_cookies: function() {
-            $.cookie(mvuserdbwv.site_info.cookie_user, "", {expires: 0});
-            $.cookie(mvuserdbwv.site_info.cookie_token, "", {expires: 0});
+            $.cookie(hoipoi.site_info.cookie_user, "", {expires: 0});
+            $.cookie(hoipoi.site_info.cookie_token, "", {expires: 0});
         },
 
         _clear_userinfo: function() {
-            $(mvuserdbwv.site_info.dom_login + " .password").val('');
-            mvuserdbwv.token = null;
-            mvuserdbwv.username = null;
-            mvuserdbwv.userinfo = {};
-            mvuserdbwv.remove_vote_buttons();
+            $(hoipoi.site_info.dom_login + " .password").val('');
+            hoipoi.token = null;
+            hoipoi.username = null;
+            hoipoi.userinfo = {};
+            hoipoi.remove_vote_buttons();
         },
 
         _login_succeeded: function(userdata) {
-            mvuserdbwv.userinfo = userdata;
-            $(mvuserdbwv.site_info.dom_login_error).hide();
-            $(mvuserdbwv.site_info.dom_logout).show();
-            $(mvuserdbwv.site_info.dom_login).hide();
-            $(mvuserdbwv.site_info.dom_nickname).html(userdata.nickname);
-            $.cookie(mvuserdbwv.site_info.cookie_user, mvuserdbwv.username);
-            $.cookie(mvuserdbwv.site_info.cookie_token, mvuserdbwv.token,
+            hoipoi.userinfo = userdata;
+            $(hoipoi.site_info.dom_login_error).hide();
+            $(hoipoi.site_info.dom_logout).show();
+            $(hoipoi.site_info.dom_login).hide();
+            $(hoipoi.site_info.dom_nickname).html(userdata.nickname);
+            $.cookie(hoipoi.site_info.cookie_user, hoipoi.username);
+            $.cookie(hoipoi.site_info.cookie_token, hoipoi.token,
                      {expires: 10});
-            mvuserdbwv.create_vote_buttons();
+            hoipoi.create_vote_buttons();
         },
 
         _login_failed: function() {
-            $(mvuserdbwv.site_info.dom_logout).hide();
-            $(mvuserdbwv.site_info.dom_login).show();
-            $(mvuserdbwv.site_info.dom_login_error).show();
-            mvuserdbwv._clear_cookies();
+            $(hoipoi.site_info.dom_logout).hide();
+            $(hoipoi.site_info.dom_login).show();
+            $(hoipoi.site_info.dom_login_error).show();
+            hoipoi._clear_cookies();
         },
 
         _load_userinfo: function() {
@@ -148,7 +148,7 @@ mvuserdbwv = (function() {
                     value: value
                 },
                 success: function(userdata) {
-                    mvuserdbwv._login_succeeded(userdata);
+                    hoipoi._login_succeeded(userdata);
                     if (ok) { ok(); }
                 },
                 error: fail
@@ -166,11 +166,11 @@ mvuserdbwv = (function() {
                     newjson: this.json_path(username, token)
                 },
                 success: function(userdata) {
-                    $(mvuserdbwv.site_info.dom_login + " .username"
+                    $(hoipoi.site_info.dom_login + " .username"
                       ).val(this.username);
-                    mvuserdbwv.token = token;
-                    mvuserdbwv.username = username;
-                    mvuserdbwv._login_succeeded(userdata);
+                    hoipoi.token = token;
+                    hoipoi.username = username;
+                    hoipoi._login_succeeded(userdata);
                     if (ok) { ok(); }
                 },
                 error: fail
@@ -199,7 +199,7 @@ mvuserdbwv = (function() {
                             if ($(e.target).hasClass("selected")) {
                                 value = "";
                             }
-                            mvuserdbwv.cast_vote(issue, value);
+                            hoipoi.cast_vote(issue, value);
                         });
                     }
                 }

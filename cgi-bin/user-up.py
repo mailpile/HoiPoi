@@ -16,7 +16,7 @@ import os
 import json
 import sys
 
-JSON_HOME = '/home/mailpile/mvuserdbwv/db/'
+JSON_HOME = '/home/mailpile/hoipoi/db/'
 
 try:
     assert(os.getenv('REQUEST_METHOD') == 'POST')

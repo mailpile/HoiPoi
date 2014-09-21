@@ -34,7 +34,7 @@ TEMPLATES = {
         'stones': ('%(indent)s<ul class="milestones %(classes)s">\n'
                    '%(lines)s\n%(indent)s</ul>')
     },
-    'mvuserdbwv': {
+    'hoipoi': {
         'issue': ('%(indent)s'
                   '<li class="issue %(classes)s" data-issue="%(number)s">'
                   '<a href="%(url)s">%(text)s</a></li>'),
