@@ -1,25 +1,32 @@
-	<html>
+<html>
 <head>
 	<title>...</title>
 	<link rel="stylesheet" href="css/style.css"/>
 	<script src="js/jquery.js"></script>
 	<script src="js/jquery.cookie.js"></script>
 	<script src="js/sha256.js"></script>
-	<script src="js/votes.js"></script>
+	<script src="js/mvuserdbwv.js"></script>
+	<script>
+            console.log("Ohai");
+            $(document).ready(function() {
+                console.log("Ready fired");
+                mvuserdbwv.init();
+            });
+        </script>
 </head>
 <body>
 	<div class="header-bar">
 		<div id="mailpile-logo"></div>
 		<ul>
-			<li><a href="/open.html">Open votes</a></li>
-			<li><a href="/closed.html">Closed votes</a></li>
-			<div class="login-box">
-				<input id="login-username"/>
-				<input type="password" id="login-password"/>
-				<button id="login-button">Log in</button>
+			<div class="login-form">
+			        <b class="login-error">Login incorrect!</b>
+				<input class="username"/>
+				<input class="password" type="password"/>
+				<button class="login">Log in</button>
 			</div>
-			<div class="logout-box">
-				<button id="logout-button">Log out</button>
+			<div class="logout-form">
+                                Hello, <span class='login-nickname'></span>
+				<button class="logout">Log out</button>
 			</div>
 		</ul>
 	</div>
@@ -27,8 +34,8 @@
 	<div class="vote-list">
 
 		<div class="issue" data-issue="30201" data-options="yes,no">
-			<div class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></div>
-			<div class="issue-details">...</div>
+			<span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
+			<span class="issue-details">...</span>
 		</div>
 
 

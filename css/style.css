@@ -25,12 +25,16 @@ body {
 	text-decoration: none;
 }
 
-.login-box {
+.login-form {
+        float:          right;
 	border:		1px solid #000;
-	display:	inline-block;
+        margin-right:   10px;
+	display:	none;
 }
 
-.logout-box {
+.logout-form {
+        float:          right;
+        margin-right:   10px;
 	display:	none;
 }
 
@@ -55,14 +59,17 @@ body {
 
 .issue .vote {
 	background-color: #999;
-	padding: 10px;
-	float: right;
-	clear: both;
-	/* display: none; */
+	padding: 4px;
+	margin: 1px 4px;
+	float: left;
 }
 
-.issue .vote .selected {
-	background-color: #9f9;
+.issue .vote.selecting {
+	background-color: #bb7;
+}
+
+.issue .vote.selected {
+	background-color: #7d7;
 }
 
 .issue .vote .up {

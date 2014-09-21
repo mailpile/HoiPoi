@@ -24,13 +24,16 @@ try:
     request = cgi.FieldStorage()
     json_file = str(request['json'].value)
     variable = unicode(request['variable'].value)
-    value = unicode(request['value'].value)
+    value = unicode(request['value'].value if 'value' in request else None)
 
     assert('/' not in json_file)
     json_path = os.path.join(JSON_HOME, json_file)
 
     data = json.load(open(json_path, 'r'))
-    data[variable] = value
+    if value not in ('', None):
+       data[variable] = value
+    elif variable in data:
+       del data[variable]
     json.dump(data, open(json_path, 'w'))
 
     print 'Content-type: application/json'
