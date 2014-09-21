@@ -84,8 +84,7 @@ Your HTML code should then look something like this:
 
 One way to generate a list of things for users to vote on, is to scrape
 issues from Github.  An issue scraper is included in `cron/get-issues.py`,
-which knows how to generate an HTML fragment formatted for use with the
-MVUserDBWV.
+which knows how to generate an HTML fragment formatted for use with Hoi Poi.
 
 The issue scraper script relies on PyGithub:
 
@@ -97,6 +96,7 @@ The issue scraper script relies on PyGithub:
     python setup.py install
     cd ..
 
+You'll want to edit the script to point at your repo, instead of ours.
 
 
 ## Copyright & License
