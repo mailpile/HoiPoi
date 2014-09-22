@@ -1,7 +1,7 @@
 <html>
 <head>
     <title>Hoi Poi User Generation Tool</title>
-    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="css/hoipoi.css"/>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.cookie.js"></script>
     <script src="js/sjcl.js"></script>
@@ -32,7 +32,11 @@
                 }
                 if (!nickname) { nickname = email };
                 if (email) {
-                    users.push({ email: email, nickname: nickname });
+                    users.push({
+                        email: email,
+                        nickname: nickname,
+                        raw: input[i]
+                    });
                 }
             }
             if (!users) {
@@ -46,38 +50,51 @@
                 return;
             }
             $('#nothing-yet').hide();
-            if (!confirm('Sure? This might take a while!')) {
-                $('#nothing-yet').show();
-                return;
-            }
+            $('#go').hide();
 
             sjcl.random.addEntropy(randcrap);
             var hexdump = sjcl.codec.hex.fromBits;
+            var countdown = 3;
+            var unfinished = '';
             for (var u in users) {
-                var username = users[u].email;
-                var nickname = users[u].nickname;
-                var password = hexdump(sjcl.random.randomWords(1));
-                var token = hoipoi.make_token(username, password);
-                var json = hoipoi.json_path(username, token);
-                var url = hoipoi.make_url(login_page, username, token);
-                $('#output').append(
-                    '<p class="user"><tt>' +
-                    '<i class="json">' + json + '</i> : ' +
-                    '<b class="nickname">' + nickname + '</b> : ' +
-                    '<b class="username">' + username + '</b> : ' +
-                    '<i class="password">' + password + '</i> : ' +
-                    '<a class="url" href="' + url + '">URL</a>' +
-                    '</tt></p>'
-                );
+                countdown -= 1;
+                if (countdown >= 0) {
+                    var username = users[u].email;
+                    var nickname = users[u].nickname;
+                    var password = hexdump(sjcl.random.randomWords(1));
+                    var token = hoipoi.make_token(username, password);
+                    var json = hoipoi.json_path(username, token);
+                    var url = hoipoi.make_url(login_page, username, token);
+                    $('#output').append(
+                        '<p class="user"><tt>' +
+                        '<i class="json">' + json + '</i> : ' +
+                        '<b class="nickname">' + nickname + '</b> : ' +
+                        '<b class="username">' + username + '</b> : ' +
+                        '<i class="password">' + password + '</i> : ' +
+                        '<a class="url" href="' + url + '">URL</a>' +
+                        '</tt></p>'
+                    );
+                }
+                else {
+                    unfinished += users[u].raw + '\n';
+                }
             }
-            $('#input').val('');
-            $('#random_seed').val('');
-            $('#users-exist-stuff').show();
+            if ($('#makeusers-auth').val()) {
+                setTimeout('make_users();', 100);
+            }
+            if (unfinished) {
+                $('#input').val(unfinished);
+                setTimeout('generate_output();', 500);
+            }
+            else {
+                $('#input').val('');
+                $('#random_seed').val('');
+                $('#go').show();
+            }
         }
 
         function clear_output() {
             $('.user').remove();
-            $('#users-exist-stuff').hide();
             $('#nothing-yet').show();
         }
 
@@ -126,14 +143,13 @@ Brennan bnvk@mailpile.is,
 Smari &lt;smari@mailpile.is&gt;
         </textarea><br>
         <input type=submit value="Create passwords & tokens" id="go"><br>
-        <div id='users-exist-stuff' style='display: none;'>
-            <br><hr><br>
-            <input type=submit value="Clear user list" id="clear"><br>
 
-            <br><hr><br>
-            Password: <input size=8 type="password" id="makeusers-auth"><br>
-            <input type=submit value="Create users" id="makeusers"><br>
-        </div>
+        <br><hr><br>
+        <input type=submit value="Clear user list" id="clear"><br>
+
+        <br><hr><br>
+        Password: <input size=8 type="password" id="makeusers-auth"><br>
+        <input type=submit value="Create users" id="makeusers"><br>
     </div>
 
     <h1>This is a password and token generator!</h1>
