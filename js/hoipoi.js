@@ -47,6 +47,11 @@ hoipoi = (function() {
         }
     };
 
+    var _make_token = function(username, password) {
+        var pbkdf2 = sjcl.misc.pbkdf2(password, username, 20149, 128);
+        return sjcl.codec.hex.fromBits(pbkdf2);
+    };
+
     return {
         site_info: {
             // Default settings...
@@ -149,7 +154,7 @@ hoipoi = (function() {
         },
 
         login: function(username, password) {
-            var token = Sha256.hash(_encode_once(username) + ":" + password);
+            var token = _make_token(username, password);
             this.token = token;
             this.username = username;
             this._load_userinfo();
@@ -181,7 +186,7 @@ hoipoi = (function() {
         },
 
         change_username_password: function(username, password, ok, fail) {
-            var token = Sha256.hash(_encode_once(username) + ":" + password);
+            var token = _make_token(username, password);
             $.ajax({
                 url: this.site_info.url_mv,
                 type: "POST",

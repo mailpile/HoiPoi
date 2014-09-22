@@ -42,7 +42,7 @@ Your HTML code should then look something like this:
 
         <script src="/js/jquery.js"></script>
         <script src="/js/jquery.cookie.js"></script>
-        <script src="/js/sha256.js"></script>
+        <script src="/js/sjcl.js"></script>
         <script src="/js/hoipoi.js"></script>
         <script>
             $(document).ready(function() {
@@ -110,6 +110,7 @@ User database strategy:
 * User data is stored in filesystem as /some/folder/&lt;username>.&lt;sha256(&lt;username>, ":", &lt;password>)>.json
    * Initial user database is created with a python script that eats our list of backers and spits out json files
    * Mail them a "log in to your Mailpile Community" email with a magic clicable URL and username/password details
+   * **Update:** Replaced SHA256 with 20149 rounds of PBKFD2 from the SJCL.
 * When a user "logs in", javascript code calculates the path and downloads the JSON
    * On login, a cookie is set with the JSON filename value and the extracted user's name
    * The website UI can have trivial JS to say "Hello Person" and load the JSON on pages that need it
@@ -117,13 +118,13 @@ User database strategy:
     * nickname -> User's visible name, used in web UI, cookie and outgoing e-mail
     * email_subscription -> one of "weekly", "monthly", "none"
     * vote.ID -> one of "yes", "no", "none"
-* When a user votes, an AJAX POST request is sent to /cgi-bin/user-up.py - written
+* When a user votes, an AJAX POST request is sent to /cgi-bin/user-up.py
     * Cookie is ignored for security reasons (avoid CSRF attacks)
     * json=JSON filename (slashes disallowed)
     * variable=vote.ID
     * value=yes (or no or none)
-* Same interface is used to change name or e-mail subscription values - written
-* When a user changes their password, an AJAX POST request is sent to /cgi-bin/user-mv.py - written
+* Same interface is used to change name or e-mail subscription values
+* When a user changes their password, an AJAX POST request is sent to /cgi-bin/user-mv.py
     * Cookie is ignored for security reasons (avoid CSRF attacks)
     * oldjson=JSON filename (slashes disallowed)
     * newjson=new JSON filename
