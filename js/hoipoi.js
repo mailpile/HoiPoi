@@ -7,7 +7,7 @@ hoipoi = (function() {
 
     // Magic cookies that can also come from URL hash parts!
     var _hashbrownie = function(name) {
-        var hash = "&" + (document.location.hash || '#').substring(1);
+        var hash = "&" + (document.location.hash || "#").substring(1);
         var find = "&" + name + "=";
         var where = hash.indexOf(find);
         if (where >= 0) {
@@ -24,10 +24,10 @@ hoipoi = (function() {
     var _cache_bust = function(url) {
         var ts = (new Date()).getTime();
         if (url.indexOf("?") < 0) {
-            return url + '?_cts=' + ts;
+            return url + "?_cts=" + ts;
         }
         else {
-            return url + '&_cts=' + ts;
+            return url + "&_cts=" + ts;
         }
     };
 
@@ -97,7 +97,7 @@ hoipoi = (function() {
         },
 
         _clear_userinfo: function() {
-            $(hoipoi.site_info.dom_login + " .password").val('');
+            $(hoipoi.site_info.dom_login + " .password").val("");
             hoipoi.token = null;
             hoipoi.username = null;
             hoipoi.userinfo = {};
@@ -126,8 +126,7 @@ hoipoi = (function() {
         _load_userinfo: function() {
             $.ajax({
                 url: _cache_bust(this.site_info.url_db + this.json_path()),
-                type: 'GET',
-                dataType: 'json',
+                type: "GET",
                 success: this._login_succeeded,
                 error: this._login_failed
             });
@@ -151,7 +150,7 @@ hoipoi = (function() {
         user_set: function(variable, value, ok, fail) {
             $.ajax({
                 url: this.site_info.url_up,
-                type: 'POST',
+                type: "POST",
                 data: {
                     json: this.json_path(),
                     variable: variable,
@@ -169,8 +168,7 @@ hoipoi = (function() {
             var token = Sha256.hash(username + ":" + password);
             $.ajax({
                 url: this.site_info.url_mv,
-                type: 'POST',
-                dataType: 'json',
+                type: "POST",
                 data: {
                     oldjson: this.json_path(),
                     newjson: this.json_path(username, token)
