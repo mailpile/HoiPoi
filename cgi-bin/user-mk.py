@@ -42,17 +42,17 @@ try:
     request = cgi.FieldStorage()
 
     # Authenticate before doing any more work
-    auth = unicode(request['auth'].value)
+    auth = unicode(request['auth'].value.decode('utf-8'))
     assert(sha256(AUTH_SALT + auth).hexdigest() == AUTH_HASH)
 
     # Load up all our data
     json_file = str(request['json'].value)
-    content = unicode(request['content'].value)
+    content = unicode(request['content'].value.decode('utf-8'))
     if 'mailto' in request:
         mailto = unicode(request['mailto'].value)
-        password = unicode(request['password'].value)
-        login_url = unicode(request['login_url'].value)
-        email_template = open(EMAIL_TPL, 'r').read()
+        password = unicode(request['password'].value.decode('utf-8'))
+        login_url = unicode(request['login_url'].value.decode('utf-8'))
+        email_template = open(EMAIL_TPL, 'r').read().decode('utf-8')
         email_subject, email_body = email_template.split('\n\n', 1)
         assert(email_subject.lower().startswith('subject:'))
         email_subject = email_subject.split(':', 1)[1].strip()
@@ -88,17 +88,17 @@ try:
             }
         email_subject = fmt(email_subject)
         email_body = fmt(email_body)
-        mailer = Popen(['mutt', '-s', email_subject, mailto],
+        mailer = Popen(['mutt', '-s', email_subject.encode('utf-8'), mailto],
                        stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        mailer.stdin.write(email_body)
+        mailer.stdin.write(email_body.encode('utf-8'))
         mailer.stdin.close()
         sys.stderr.write(mailer.stdout.read())
         sys.stderr.write(mailer.stderr.read())
         assert(0 == mailer.wait())
 
-    print 'Content-type: application/json'
+    print 'Content-type: application/json; charset=utf-8'
     print
-    print '%s' % content
+    print '%s' % content.encode('utf-8')
 
 except:
     import traceback

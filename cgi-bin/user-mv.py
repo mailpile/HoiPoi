@@ -31,7 +31,7 @@ try:
     assert(not os.path.exists(json_new_path))
     os.rename(json_old_path, json_new_path)
 
-    print 'Content-type: application/json'
+    print 'Content-type: application/json; charset=utf-8'
     print
     print '%s' % open(json_new_path).read()
 

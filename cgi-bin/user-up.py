@@ -24,7 +24,8 @@ try:
     request = cgi.FieldStorage()
     json_file = str(request['json'].value)
     variable = unicode(request['variable'].value)
-    value = unicode(request['value'].value if 'value' in request else None)
+    value = unicode(request['value'].value.decode('utf-8')
+                    if 'value' in request else None)
 
     assert('/' not in json_file)
     json_path = os.path.join(JSON_HOME, json_file)
@@ -36,9 +37,9 @@ try:
        del data[variable]
     json.dump(data, open(json_path, 'w'))
 
-    print 'Content-type: application/json'
+    print 'Content-type: application/json; charset=utf-8'
     print
-    print '%s' % json.dumps(data)
+    print '%s' % json.dumps(data).encode('utf-8')
 
 except:
     import traceback
