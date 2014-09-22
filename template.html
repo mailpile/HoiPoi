@@ -1,43 +1,40 @@
 <html>
 <head>
-	<title>Hoi Poi HTML Example</title>
-	<link rel="stylesheet" href="css/style.css"/>
-	<script src="js/jquery.js"></script>
-	<script src="js/jquery.cookie.js"></script>
-	<script src="js/sjcl.js"></script>
-	<script src="js/hoipoi.js"></script>
-	<script>
-            $(document).ready(function() {
-                hoipoi.init();
-            });
-        </script>
+    <title>Hoi Poi HTML Example</title>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.cookie.js"></script>
+    <script src="js/sjcl.js"></script>
+    <script src="js/hoipoi.js"></script>
+    <script>
+        $(document).ready(function() {
+            hoipoi.init();
+        });
+    </script>
 </head>
 <body>
-	<div class="header-bar">
-		<div id="mailpile-logo"></div>
-		<ul>
-			<div class="login-form">
-			        <b class="login-error">Login incorrect!</b>
-				<input class="username"/>
-				<input class="password" type="password"/>
-				<button class="login">Log in</button>
-			</div>
-			<div class="logout-form">
-                                Hello, <span class='login-nickname'></span>
-				<button class="logout">Log out</button>
-			</div>
-		</ul>
-	</div>
+    <div class="header-bar">
+        <div id="mailpile-logo"></div>
+        <ul>
+            <div class="login-form">
+                <b class="login-error">Login incorrect!</b>
+                <input class="username"/>
+                <input class="password" type="password"/>
+                <button class="login">Log in</button>
+            </div>
+            <div class="logout-form">
+                Hello, <span class='login-nickname'></span>
+                <button class="logout">Log out</button>
+            </div>
+        </ul>
+    </div>
 
-	<div class="vote-list">
-
-		<div class="issue" data-issue="30201" data-options="yes,no">
-			<span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
-			<span class="issue-details">...</span>
-		</div>
-
-
-	</div>
+    <div class="vote-list">
+        <div class="issue" data-issue="30201" data-options="yes,no">
+            <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
+            <span class="issue-details">...</span>
+        </div>
+    </div>
 
 </body>
 </html>
