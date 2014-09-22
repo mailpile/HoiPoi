@@ -112,7 +112,8 @@
                 var url = $(dom_user).find('.url').attr('href');
                 if (json && username && password && url) {
                     hoipoi.user_create(auth, json, {
-                            'nickname': nickname,
+                            'email': username,
+                            'nickname': nickname
                         }, username, password, url,
                         function() { // OK
                             $(dom_user).remove();
