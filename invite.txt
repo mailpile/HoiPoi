@@ -1,0 +1,19 @@
+Subject: Welcome to Hoi Poi!
+
+Dear %(nickname)s,
+
+You have been invited to join a Hoi Poi community!  Hooray!
+
+Please click this link to join: <%(login_url)s>
+Your details:
+
+    username: %(mailto)s
+    password: %(password)s
+
+You should be able to change both the username and the password once you
+have logged in.
+
+Welcome!
+
+-- 
+The Generic Hoi Poi Admins

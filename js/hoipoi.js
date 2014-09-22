@@ -53,6 +53,7 @@ hoipoi = (function() {
             url_db: "/hoipoi/db/",       // Directory of user json
             url_up: "/cgi-bin/user-up.py",   // Path to update CGI script
             url_mv: "/cgi-bin/user-mv.py",   // Path to moving CGI script
+            url_mk: "/cgi-bin/user-mk.py",   // Path to creating CGI script
             dom_login: ".login-form",        // Selector for login form
             dom_logout: ".logout-form",      // Selector for logout form
             dom_login_error: ".login-error", // Selector for "login failed"
@@ -210,6 +211,25 @@ hoipoi = (function() {
                     hoipoi._login_succeeded(userdata);
                     if (ok) { ok(); }
                 },
+                error: fail
+            });
+        },
+
+        user_create: function(auth, json_path, content,
+                              mailto, password, login_url,
+                              ok, fail) {
+            $.ajax({
+                url: this.site_info.url_mk,
+                type: "POST",
+                data: {
+                    auth: auth,
+                    json: json_path,
+                    content: JSON.stringify(content),
+                    mailto: mailto,
+                    password: password,
+                    login_url: login_url
+                },
+                success: ok,
                 error: fail
             });
         },

@@ -7,7 +7,7 @@
     <script src="js/sjcl.js"></script>
     <script src="js/hoipoi.js"></script>
     <script>
-        var login_page = '/';
+        var login_page = 'http://localhost/hoipoi/template.html';
 
         function generate_output() {
             var input = $('#input').val().match(/[^\r\n\ ]+/g);
@@ -20,6 +20,12 @@
                 alert('Hey, put some random garbage in the seed box.');
                 return;
             }
+            $('#nothing-yet').hide();
+            if (!confirm('Sure? This might take a while!')) {
+                $('#nothing-yet').show();
+                return;
+            }
+
             sjcl.random.addEntropy(randcrap);
             var hexdump = sjcl.codec.hex.fromBits;
             for (i in input) {
@@ -29,7 +35,7 @@
                 var json = hoipoi.json_path(username, token);
                 var url = hoipoi.make_url(login_page, username, token);
                 $('#output').append(
-                    '<p><tt>' +
+                    '<p class="user"><tt>' +
                     '<i class="json">' + json + '</i> : ' +
                     '<b class="username">' + username + '</b> : ' +
                     '<i class="password">' + password + '</i> : ' +
@@ -43,13 +49,38 @@
         }
 
         function clear_output() {
-            $('#output').html('');
+            $('.user').remove();
             $('#users-exist-stuff').hide();
+            $('#nothing-yet').show();
+        }
+
+        function make_users() {
+            var auth = $('#makeusers-auth').val();
+            if (!auth.length) {
+                alert('You need to authenticate, or all will fail.');
+                return;
+            }
+            $('.user').each(function(i, dom_user) {
+                var json = $(dom_user).find('.json').html();
+                var username = $(dom_user).find('.username').html();
+                var password = $(dom_user).find('.password').html();
+                var url = $(dom_user).find('.url').html();
+                if (json && username && password && url) {
+                    hoipoi.user_create(auth, json, {}, username, password, url,
+                        function() { // OK
+                            $(dom_user).remove();
+                        },
+                        function() { // Fail
+                        }
+                    );
+                }
+            });
         }
 
         $(document).ready(function() {
             $('#go').click(generate_output);
             $('#clear').click(clear_output);
+            $('#makeusers').click(make_users);
         });
     </script>
 </head>
@@ -70,13 +101,16 @@ smari@mailpile.is
             <input type=submit value="Clear user list" id="clear"><br>
 
             <br><hr><br>
-            Password: <input size=8 type="password" id="password"><br>
+            Password: <input size=8 type="password" id="makeusers-auth"><br>
             <input type=submit value="Create users" id="makeusers"><br>
         </div>
     </div>
 
     <h1>This is a password and token generator!</h1>
-
-    <div id='output' style='font-size: 10px;'></div>
+    <p id='nothing-yet'>
+         &nbsp; <i>Nothing has been created yet ...</i>
+    </p>
+    <div id='output' style='font-size: 10px;'>
+    </div>
 </body>
 </html>
