@@ -5,6 +5,22 @@
  */
 hoipoi = (function() {
 
+    // This is a lossy encoding that will only modify the string once, no
+    // matter how often you encode it. It is also guaranteed not to get
+    // decoded by standard parts of a normal web stack.
+    var _encode_once = function(txt) {
+        return encodeURIComponent(txt).replace(/%([a-fA-F0-9][a-fA-F0-9])/g,
+                                               function(_, pair) {
+            return "-" + pair.toUpperCase();
+        });
+    };
+
+    // Partial reversal of the above - just to make e-mail addresses look
+    // nice. Does NOT decode all cases.
+    var _decode_some = function(txt) {
+        return txt.replace(/-40/g, "@").replace(/-2B/g, "+");
+    };
+
     // Magic cookies that can also come from URL hash parts!
     var _hashbrownie = function(name) {
         var hash = "&" + (document.location.hash || "#").substring(1);
@@ -14,9 +30,9 @@ hoipoi = (function() {
             var val = hash.substring(where + find.length);
             where = val.indexOf("&");
             if (where >= 0) {
-                return val.substring(0, where);
+                return _decode_some(val.substring(0, where));
             }
-            return val;
+            return _decode_some(val);
         }
         return $.cookie(name);
     };
@@ -87,8 +103,8 @@ hoipoi = (function() {
         },
 
         json_path: function(username, token) {
-            return ((username || this.username) + "." +
-                    (token || this.token) + ".json");
+            return _encode_once((username || this.username) + "." +
+                                (token || this.token) + ".json");
         },
 
         _clear_cookies: function() {
@@ -133,7 +149,7 @@ hoipoi = (function() {
         },
 
         login: function(username, password) {
-            var token = Sha256.hash(username + ":" + password);
+            var token = Sha256.hash(_encode_once(username) + ":" + password);
             this.token = token;
             this.username = username;
             this._load_userinfo();
@@ -165,7 +181,7 @@ hoipoi = (function() {
         },
 
         change_username_password: function(username, password, ok, fail) {
-            var token = Sha256.hash(username + ":" + password);
+            var token = Sha256.hash(_encode_once(username) + ":" + password);
             $.ajax({
                 url: this.site_info.url_mv,
                 type: "POST",
