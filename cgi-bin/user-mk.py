@@ -64,6 +64,7 @@ try:
     userdata = json.loads(content)
     content = json.dumps(userdata)
     assert('/' not in json_file)
+    assert(json_file.endswith('.json'))
     json_path = os.path.join(JSON_HOME, json_file)
     assert(not os.path.exists(json_path))
     if mailto:

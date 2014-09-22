@@ -10,11 +10,36 @@
         var login_page = 'http://localhost/hoipoi/template.html';
 
         function generate_output() {
-            var input = $('#input').val().match(/[^\r\n\ ]+/g);
+            var input = $('#input').val().match(/[^\r\n,]+/g);
             if (!input) {
                 alert('What!? Add some users first!');
                 return;
             }
+            var users = [];
+            for (var i in input) {
+                var words = input[i].replace(/[<>"\(\)]/g, ''
+                                             ).match(/[^\ \t]+/g);
+                var email = null;
+                var nickname = '';
+                for (var w in words) {
+                    if (words[w].indexOf('@') > 0) {
+                        email = words[w];
+                    }
+                    else {
+                        if (nickname) { nickname += ' '; }
+                        nickname += words[w];
+                    }
+                }
+                if (!nickname) { nickname = email };
+                if (email) {
+                    users.push({ email: email, nickname: nickname });
+                }
+            }
+            if (!users) {
+                alert('Hmm, that did not parse.');
+                return;
+            }
+
             var randcrap = $('#random_seed').val();
             if (!randcrap.length) {
                 alert('Hey, put some random garbage in the seed box.');
@@ -28,8 +53,9 @@
 
             sjcl.random.addEntropy(randcrap);
             var hexdump = sjcl.codec.hex.fromBits;
-            for (i in input) {
-                var username = input[i];
+            for (var u in users) {
+                var username = users[u].email;
+                var nickname = users[u].nickname;
                 var password = hexdump(sjcl.random.randomWords(1));
                 var token = hoipoi.make_token(username, password);
                 var json = hoipoi.json_path(username, token);
@@ -37,9 +63,10 @@
                 $('#output').append(
                     '<p class="user"><tt>' +
                     '<i class="json">' + json + '</i> : ' +
+                    '<b class="nickname">' + nickname + '</b> : ' +
                     '<b class="username">' + username + '</b> : ' +
                     '<i class="password">' + password + '</i> : ' +
-                    '<a class="url" href="' + url + '">' + url + '</a>' +
+                    '<a class="url" href="' + url + '">URL</a>' +
                     '</tt></p>'
                 );
             }
@@ -62,11 +89,14 @@
             }
             $('.user').each(function(i, dom_user) {
                 var json = $(dom_user).find('.json').html();
+                var nickname = $(dom_user).find('.nickname').html();
                 var username = $(dom_user).find('.username').html();
                 var password = $(dom_user).find('.password').html();
-                var url = $(dom_user).find('.url').html();
+                var url = $(dom_user).find('.url').attr('href');
                 if (json && username && password && url) {
-                    hoipoi.user_create(auth, json, {}, username, password, url,
+                    hoipoi.user_create(auth, json, {
+                            'nickname': nickname,
+                        }, username, password, url,
                         function() { // OK
                             $(dom_user).remove();
                         },
@@ -91,9 +121,9 @@
         <br>
         People:<br>
         <textarea rows=20 cols=30 id="input">
-bre@mailpile.is
-bnvk@mailpile.is
-smari@mailpile.is
+Bjarni R. Einarsson bre@mailpile.is,
+Brennan bnvk@mailpile.is,
+Smari &lt;smari@mailpile.is&gt;
         </textarea><br>
         <input type=submit value="Create passwords & tokens" id="go"><br>
         <div id='users-exist-stuff' style='display: none;'>
