@@ -1,0 +1,82 @@
+<html>
+<head>
+    <title>Hoi Poi User Generation Tool</title>
+    <link rel="stylesheet" href="css/style.css"/>
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.cookie.js"></script>
+    <script src="js/sjcl.js"></script>
+    <script src="js/hoipoi.js"></script>
+    <script>
+        var login_page = '/';
+
+        function generate_output() {
+            var input = $('#input').val().match(/[^\r\n\ ]+/g);
+            if (!input) {
+                alert('What!? Add some users first!');
+                return;
+            }
+            var randcrap = $('#random_seed').val();
+            if (!randcrap.length) {
+                alert('Hey, put some random garbage in the seed box.');
+                return;
+            }
+            sjcl.random.addEntropy(randcrap);
+            var hexdump = sjcl.codec.hex.fromBits;
+            for (i in input) {
+                var username = input[i];
+                var password = hexdump(sjcl.random.randomWords(1));
+                var token = hoipoi.make_token(username, password);
+                var json = hoipoi.json_path(username, token);
+                var url = hoipoi.make_url(login_page, username, token);
+                $('#output').append(
+                    '<p><tt>' +
+                    '<i class="json">' + json + '</i> : ' +
+                    '<b class="username">' + username + '</b> : ' +
+                    '<i class="password">' + password + '</i> : ' +
+                    '<a class="url" href="' + url + '">' + url + '</a>' +
+                    '</tt></p>'
+                );
+            }
+            $('#input').val('');
+            $('#random_seed').val('');
+            $('#users-exist-stuff').show();
+        }
+
+        function clear_output() {
+            $('#output').html('');
+            $('#users-exist-stuff').hide();
+        }
+
+        $(document).ready(function() {
+            $('#go').click(generate_output);
+            $('#clear').click(clear_output);
+        });
+    </script>
+</head>
+<body style='padding: 5px;'>
+    <div style='float: right; text-align: center;'>
+        Random seed:<br>
+        <input type="text" size=19 value="" id="random_seed"><br>
+        <br>
+        People:<br>
+        <textarea rows=20 cols=30 id="input">
+bre@mailpile.is
+bnvk@mailpile.is
+smari@mailpile.is
+        </textarea><br>
+        <input type=submit value="Create passwords & tokens" id="go"><br>
+        <div id='users-exist-stuff' style='display: none;'>
+            <br><hr><br>
+            <input type=submit value="Clear user list" id="clear"><br>
+
+            <br><hr><br>
+            Password: <input size=8 type="password" id="password"><br>
+            <input type=submit value="Create users" id="makeusers"><br>
+        </div>
+    </div>
+
+    <h1>This is a password and token generator!</h1>
+
+    <div id='output' style='font-size: 10px;'></div>
+</body>
+</html>

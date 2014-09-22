@@ -47,11 +47,6 @@ hoipoi = (function() {
         }
     };
 
-    var _make_token = function(username, password) {
-        var pbkdf2 = sjcl.misc.pbkdf2(password, username, 20149, 128);
-        return sjcl.codec.hex.fromBits(pbkdf2);
-    };
-
     return {
         site_info: {
             // Default settings...
@@ -68,6 +63,19 @@ hoipoi = (function() {
         username: null,
         token: null,
         userinfo: {},
+
+        make_token: function(username, password) {
+            var pbkdf2 = sjcl.misc.pbkdf2(password, username, 20149, 128);
+            return sjcl.codec.hex.fromBits(pbkdf2);
+        },
+
+        make_url: function(path, username, token) {
+            username = _encode_once(username || this.username);
+            token = (token || this.token);
+            return (path +
+                    '#' + this.site_info.cookie_user + '=' + username +
+                    '&' + this.site_info.cookie_token + '=' + token);
+        },
 
         // This function installs the required hooks for login/logout
         // and checks the current cookie state to figure out whether
@@ -154,7 +162,7 @@ hoipoi = (function() {
         },
 
         login: function(username, password) {
-            var token = _make_token(username, password);
+            var token = this.make_token(username, password);
             this.token = token;
             this.username = username;
             this._load_userinfo();
@@ -186,7 +194,7 @@ hoipoi = (function() {
         },
 
         change_username_password: function(username, password, ok, fail) {
-            var token = _make_token(username, password);
+            var token = this.make_token(username, password);
             $.ajax({
                 url: this.site_info.url_mv,
                 type: "POST",
