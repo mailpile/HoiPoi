@@ -60,32 +60,46 @@ def safe_print(text):
     print text.encode('utf-8')
 
 
-def issue_lines(template, issues, indent=''):
+def issue_lines(template, issues, indent='', label_ignore=[], dedup=False):
     lines = []
     issues.sort(key=lambda i: i.title)
     for i in issues:
+        if dedup and i in dedup:
+            continue
         lines.append(template['issue'] % {
-           'indent': indent,
-           'classes': '', # FIXME: Add all the labels as classes?
-           'number': i.number,
-           'text': i.title,
-           'url': i.html_url
+            'indent': indent,
+            'classes': ' '.join(['label-%s' % html_class(l.name)
+                                 for l in i.labels
+                                 if l.name.lower() not in label_ignore]),
+            'number': i.number,
+            'text': i.title,
+            'url': i.html_url
         })
+        if dedup:
+            dedup.append(i)
     return lines
 
 
-def issue_list(template, issues, indent=''):
+def issue_list(template, issues, indent='', **kwargs):
+    data = '\n'.join(issue_lines(template, issues,
+                                 indent=indent+'   ', **kwargs))
+    if not data:
+        return ''
     return template['issues'] % {
         'indent': indent,
         'classes': '',
-        'lines': '\n'.join(issue_lines(template, issues, indent=indent+'   '))
+        'lines': data
     }
 
 
-def label_lines(template, issues, indent=''):
-    by_label = {}
+def label_lines(template, issues, indent='', **kwargs):
+    by_label = {'Unlabeled': [None, []]}
+    ignored = kwargs.get('label_ignore') or []
     for i in issues:
-        for label in i.labels:
+        labels = [l for l in i.labels if l.name.lower() not in ignored]
+        if not labels:
+            by_label['Unlabeled'][1].append(i)
+        for label in labels:
             if label.name not in by_label:
                 by_label[label.name] = (label, [])
             by_label[label.name][1].append(i)
@@ -93,28 +107,35 @@ def label_lines(template, issues, indent=''):
     lines = []
     for lname in sorted(by_label.keys()):
         label, issues = by_label[lname]
-        text = lname + ' ' + issue_list(template, issues, indent=indent)
-        lines.append(template['label'] % {
-            'indent': indent,
-            'classes': 'label-%s' % html_class(lname),
-            'text': text
-        })
+        data = issue_list(template, issues, indent=indent, **kwargs)
+        if data:
+            lines.append(template['label'] % {
+                'indent': indent,
+                'classes': 'label-%s' % html_class(lname),
+                'text': lname + ' ' + data
+            })
     return lines
 
 
-def label_list(template, issues, indent=''):
+def label_list(template, issues, indent='', **kwargs):
+    data = '\n'.join(label_lines(template, issues,
+                                 indent=indent+'   ', **kwargs))
+    if not data:
+        return ''
     return template['labels'] % {
         'indent': indent,
         'classes': '',
-        'lines': '\n'.join(label_lines(template, issues, indent=indent+'   '))
+        'lines': data
     }
 
 
-def milestone_lines(template, issues, indent=''):
+def milestone_lines(template, issues, indent='', **kwargs):
     by_milestone = {}
     for i in issues:
         milestone = i.milestone
-        mname = milestone.title if milestone else 'Misc'
+        mname = milestone.title if milestone else 'No Milestone'
+        if mname.lower() in (kwargs.get('stone_ignore') or []):
+            continue
         if mname not in by_milestone:
             by_milestone[mname] = (milestone, [])
         by_milestone[mname][1].append(i)
@@ -122,21 +143,25 @@ def milestone_lines(template, issues, indent=''):
     lines = []
     for mname in sorted(by_milestone.keys()):
         milestone, issues = by_milestone[mname]
-        text = mname + ' ' + label_list(template, issues, indent=indent)
-        lines.append(template['stone'] % {
-            'indent': indent,
-            'classes': 'milestone-%s' % html_class(mname),
-            'text': text
-        })
+        data = label_list(template, issues, indent=indent, **kwargs)
+        if data:
+            lines.append(template['stone'] % {
+                'indent': indent,
+                'classes': 'milestone-%s' % html_class(mname),
+                'text': mname + ' ' + data
+            })
     return lines
 
 
-def milestone_list(template, issues, indent=''):
+def milestone_list(template, issues, indent='', **kwargs):
+    data = '\n'.join(milestone_lines(template, issues,
+                                     indent=indent+'   ', **kwargs))
+    if not data:
+        return ''
     return template['stones'] % {
         'indent': indent,
         'classes': '',
-        'lines': '\n'.join(milestone_lines(template, issues,
-                                           indent=indent+'   '))
+        'lines': data
     }
 
 
@@ -161,17 +186,46 @@ try:
     else:
         issues = []
 
+    if '--label_filter' in sys.argv:
+        label_arg = sys.argv[sys.argv.index('--label_filter')+1]
+        label_filter = [l.lower().strip() for l in label_arg.split(',')]
+        issues = issues or repo.get_issues(state='open', labels=label_filter)
+        label_filter = set(label_filter)
+        issues = [i for i in issues if
+                  set([l.name.lower() for l in i.labels]) & label_filter]
+    else:
+        label_filter = None
+
+    if '--label_ignore' in sys.argv:
+        label_arg = sys.argv[sys.argv.index('--label_ignore')+1]
+        label_ignore = [l.lower().strip() for l in label_arg.split(',')]
+    else:
+        label_ignore = None
+
+    if '--milestone_filter' in sys.argv:
+        stone_arg = sys.argv[sys.argv.index('--milestone_filter')+1]
+        stone_filter = set([l.lower().strip() for l in stone_arg.split(',')])
+        issues = issues or repo.get_issues(state='open')
+        issues = [i for i in issues
+                  if i.milestone and (i.milestone.name.lower() in stone_filter)]
+    else:
+        stone_filter = None
+
+    kwargs = {
+        'dedup': ['yup'] if '--dedup' in sys.argv else False,
+        'label_ignore': label_ignore
+    }
     if '--issues' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        safe_print(issue_list(template, issues))
+        safe_print(issue_list(template, issues, **kwargs))
 
     if '--labels' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        safe_print(label_list(template, issues))
+        safe_print(label_list(template, issues, **kwargs))
 
     if '--roadmap' in sys.argv:
         issues = issues or repo.get_issues(state='open')
-        safe_print(milestone_list(template, issues))
+        safe_print(milestone_list(template, issues, **kwargs))
 
     if '-i' in sys.argv:
         run_shell()
