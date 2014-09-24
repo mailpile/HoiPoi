@@ -179,20 +179,18 @@ try:
         if '--%s' % tid in sys.argv:
             template = tpl
 
+    issues = None
     if '--all' in sys.argv:
-        issues = repo.get_issues()
+        issue_args = {}
     elif '--closed' in sys.argv:
-        issues = repo.get_issues(state='closed')
+        issue_args = {'state': 'closed'}
     else:
-        issues = []
+        issue_args = {'state': 'open'}
 
     if '--label_filter' in sys.argv:
         label_arg = sys.argv[sys.argv.index('--label_filter')+1]
         label_filter = [l.lower().strip() for l in label_arg.split(',')]
-        issues = issues or repo.get_issues(state='open', labels=label_filter)
-        label_filter = set(label_filter)
-        issues = [i for i in issues if
-                  set([l.name.lower() for l in i.labels]) & label_filter]
+        issue_args['labels'] = label_filter
     else:
         label_filter = None
 
@@ -205,7 +203,7 @@ try:
     if '--milestone_filter' in sys.argv:
         stone_arg = sys.argv[sys.argv.index('--milestone_filter')+1]
         stone_filter = set([l.lower().strip() for l in stone_arg.split(',')])
-        issues = issues or repo.get_issues(state='open')
+        issues = issues or repo.get_issues(**issue_args)
         issues = [i for i in issues
                   if i.milestone and (i.milestone.name.lower() in stone_filter)]
     else:
@@ -216,15 +214,15 @@ try:
         'label_ignore': label_ignore
     }
     if '--issues' in sys.argv:
-        issues = issues or repo.get_issues(state='open')
+        issues = issues or repo.get_issues(**issue_args)
         safe_print(issue_list(template, issues, **kwargs))
 
     if '--labels' in sys.argv:
-        issues = issues or repo.get_issues(state='open')
+        issues = issues or repo.get_issues(**issue_args)
         safe_print(label_list(template, issues, **kwargs))
 
     if '--roadmap' in sys.argv:
-        issues = issues or repo.get_issues(state='open')
+        issues = issues or repo.get_issues(**issue_args)
         safe_print(milestone_list(template, issues, **kwargs))
 
     if '-i' in sys.argv:
