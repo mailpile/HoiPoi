@@ -237,23 +237,37 @@ hoipoi = (function() {
         /**** Voting code follows *******************************************/
 
         create_elections: function() {
+            hoipoi.create_ranked_elections();
+            hoipoi.create_single_choice_elections();
+        },
+
+        create_ranked_elections: function() {
+            $(".ranked-election").each(function(element) {
+                if (userdata["election"+element.data("election")]) {
+                    // We have ballot data for this election!
+                    var order = userdata["election"+element.data("election")].split(",");
+                    $(element).children().sort(sort_li).appendTo(element);
+                    function sort_li(a, b) {
+                        return (order.indexOf($(a).data("issue")) < order.indexOf($(b).data("issue"))) ? 1 : -1;
+                    }
+                }
+            });
             $(".ranked-election").sortable({
                 onDrop: function(item, election) {
                     var val = 0;
                     var issue_order = [];
                     election = $(item).parent();
-                    // console.log($(election).children());
                     election.children().each(function(i, e) {
                         var m = $(e);
-                        console.log("Child ", m);
                         issue_order.push(m.data("issue"));
                     });
                     var e = election.data("election");
-                    console.log("Setting vote in election " + e + " to: " + issue_order.join(","));
                     hoipoi.user_set("election." + e, issue_order.join(","));
                 }
             });
+        },
 
+        create_single_choice_elections: function() {
             $(".single-choice-election").each(function(i, e) {
                 var m = $(e);
                 var issue = m.data("issue");
