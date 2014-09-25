@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="css/hoipoi.css"/>
     <script src="js/jquery.js"></script>
     <script src="js/jquery.cookie.js"></script>
+    <script src="js/jquery.sortable.js"></script>
     <script src="js/sjcl.js"></script>
     <script src="js/hoipoi.js"></script>
     <script>
@@ -28,13 +29,21 @@
             </div>
         </ul>
     </div>
-
-    <div class="vote-list">
-        <div class="issue" data-issue="30201" data-options="yes,no">
-            <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
-            <span class="issue-details">...</span>
-        </div>
+    <div class="main">
+        <ol class="ranked-election" data-election="1">
+            <li class="issue" data-issue="1">
+                <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">Issue 1</a></span>
+                <span class="issue-details">...</span>
+            </li>
+            <li class="issue" data-issue="22">
+                <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">Issue 2</a></span>
+                <span class="issue-details">...</span>
+            </li>
+            <li class="issue" data-issue="333">
+                <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">Issue 3</a></span>
+                <span class="issue-details">...</span>
+            </li>
+        </ol>
     </div>
-
 </body>
 </html>

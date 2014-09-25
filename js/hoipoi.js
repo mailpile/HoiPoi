@@ -143,7 +143,7 @@ hoipoi = (function() {
             $.cookie(hoipoi.site_info.cookie_user, hoipoi.username);
             $.cookie(hoipoi.site_info.cookie_token, hoipoi.token,
                      {expires: 10});
-            hoipoi.create_vote_buttons();
+            hoipoi.create_elections();
         },
 
         _login_failed: function() {
@@ -236,8 +236,25 @@ hoipoi = (function() {
 
         /**** Voting code follows *******************************************/
 
-        create_vote_buttons: function() {
-            $(".issue").each(function(i, e) {
+        create_elections: function() {
+            $(".ranked-election").sortable({
+                onDrop: function(item, election) {
+                    var val = 0;
+                    var issue_order = [];
+                    election = $(item).parent();
+                    // console.log($(election).children());
+                    election.children().each(function(i, e) {
+                        var m = $(e);
+                        console.log("Child ", m);
+                        issue_order.push(m.data("issue"));
+                    });
+                    var e = election.data("election");
+                    console.log("Setting vote in election " + e + " to: " + issue_order.join(","));
+                    hoipoi.user_set("election." + e, issue_order.join(","));
+                }
+            });
+
+            $(".single-choice-election").each(function(i, e) {
                 var m = $(e);
                 var issue = m.data("issue");
                 var options = (m.data("options") || "yes,no").split(",");
