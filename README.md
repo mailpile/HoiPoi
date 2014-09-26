@@ -68,14 +68,24 @@ Your HTML code should then look something like this:
 
         ...
 
-        <div class="vote-list">
+        <div class="single-choice-election">
             <div class="issue" data-issue="30201" data-options="yes,no">
                 <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
                 <span class="issue-details">...</span>
             </div>
+            ...
         </div>
 
         ...
+
+        <ol class="ranked-election">
+            <li class="issue" data-issue="30201">
+                <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
+                <span class="issue-details">...</span>
+            </li>
+            ...
+        </ol>
+
      </body>
      </html>
 
@@ -149,6 +159,18 @@ Voting system strategy:
       * Each issue, there is a vote up/down button, like hacker news
       * Javascript updates the CSS style of the button based on JSON
       * Clicking submits AJAX votes as described above
+
+
+## Supported balloting methods
+
+Hoipoi currently supports two balloting methods:
+
+ * **Single choice ballots**, in which a user is presented with a set of options for each vote, of which one can be selected.
+ * **Ranked ballots**, in which a user is presented with a set of options which can be arranged preferentially by dragging to sort.
+
+## Supported tallying methods
+
+Currently there is only one tallying method supplied, a Schulze Proportional Representation method for open sorting without cutoff. Requires Python Vote Core (pyvotecore) to work.
 
 
 ## Copyright & License
