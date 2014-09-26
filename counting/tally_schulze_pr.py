@@ -1,10 +1,14 @@
 #!/usr/bin/python
+#
+#  Calculate election results on an open-ordering ballot 
+#  using the Schulze Proportional Representation method.
+#
 
 from pyvotecore.schulze_pr import SchulzePR
 import os
 import json
 
-JSON_HOME = 'db/' # '/home/mailpile/hoipoi/db/'
+JSON_HOME = '/home/mailpile/hoipoi/db/'
 electionid = 1
 
 # Collect all ballots from user JSON files
