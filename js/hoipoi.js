@@ -242,28 +242,40 @@ hoipoi = (function() {
         },
 
         create_ranked_elections: function() {
-            $(".ranked-election").each(function(element) {
-                if (userdata["election"+element.data("election")]) {
+            $(".ranked-election").each(function(index, element) {
+                var e = $(element);
+                var eid = e.data("election");
+                console.log("Initializing ranked election " + eid);
+                if (hoipoi.userinfo["election."+eid]) {
                     // We have ballot data for this election!
-                    var order = userdata["election"+element.data("election")].split(",");
-                    $(element).children().sort(sort_li).appendTo(element);
+                    var order = hoipoi.userinfo["election."+eid].split(",");
+                    console.log("Found user preferences for election: ", order);
+                    e.children().sort(sort_li).appendTo(element);
                     function sort_li(a, b) {
-                        return (order.indexOf($(a).data("issue")) < order.indexOf($(b).data("issue"))) ? 1 : -1;
+                        a = $(a).data("issue").toString();
+                        b = $(b).data("issue").toString();
+                        return (order.indexOf(a) > order.indexOf(b)) ? 1 : -1;
                     }
                 }
-            });
-            $(".ranked-election").sortable({
-                onDrop: function(item, election) {
-                    var val = 0;
-                    var issue_order = [];
-                    election = $(item).parent();
-                    election.children().each(function(i, e) {
-                        var m = $(e);
-                        issue_order.push(m.data("issue"));
-                    });
-                    var e = election.data("election");
-                    hoipoi.user_set("election." + e, issue_order.join(","));
-                }
+                console.log("Making ranked election sortable");
+                e.sortable({
+                    onDrop: function(item) {
+                        var val = 0;
+                        var issue_order = [];
+                        election = $(item).parent();
+                        election.children().each(function(i, e) {
+                            var m = $(e);
+                            issue_order.push(m.data("issue"));
+                        });
+                        var e = election.data("election");
+                        hoipoi.user_set("election." + e, issue_order.join(","));
+                        election.addClass("updating");
+                        item.removeClass("dragged").removeAttr("style");
+                        $("body").removeClass("dragging")
+                        return true;
+                    }
+                });
+                e.removeClass("updating");
             });
         },
 

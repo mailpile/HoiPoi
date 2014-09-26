@@ -90,6 +90,10 @@ body.dragging, body.dragging * {
   z-index: 2000;
 }
 
+ol.updating {
+  background-color: #eee;
+}
+
 ol.ranked-election li {
   display: block;
 }
