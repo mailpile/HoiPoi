@@ -18,8 +18,9 @@ for json_file in os.listdir(JSON_HOME):
         continue
     json_path = os.path.join(JSON_HOME, json_file)
     data = json.load(open(json_path, 'r'))
-    ballot = data["election.%d" % (electionid)].split(",")
-    ballots.append(ballot)
+    ballot = data.get("election.%d" % (electionid), "").split(",")
+    if ballot != []:
+        ballots.append(ballot)
 
 # Tally ballots
 tally = []
