@@ -46,6 +46,20 @@ TEMPLATES = {
                    '%(lines)s\n%(indent)s</ul>'),
         'stones': ('%(indent)s<ul class="milestones vote-list %(classes)s">\n'
                    '%(lines)s\n%(indent)s</ul>')
+    },
+    'hoipoi-ranked': {
+        'issue': ('%(indent)s'
+                  '<li class="issue %(classes)s" data-issue="%(number)s">'
+                  '<a href="%(url)s">%(text)s</a></li>'),
+        'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
+        'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
+        'issues': ('%(indent)s<ul class="issues ranked-election %(classes)s" '
+                   'data-election="%(unique_id)s">\n'
+                   '%(lines)s\n%(indent)s</ul>'),
+        'labels': ('%(indent)s<ul class="labels %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>'),
+        'stones': ('%(indent)s<ul class="milestones vote-list %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ul>')
     }
 }
 
@@ -60,7 +74,8 @@ def safe_print(text):
     print text.encode('utf-8')
 
 
-def issue_lines(template, issues, indent='', label_ignore=[], dedup=False):
+def issue_lines(template, issues, pid,
+                indent='', label_ignore=[], dedup=False):
     lines = []
     issues.sort(key=lambda i: i.title)
     for i in issues:
@@ -68,6 +83,7 @@ def issue_lines(template, issues, indent='', label_ignore=[], dedup=False):
             continue
         lines.append(template['issue'] % {
             'indent': indent,
+            'unique_id': '%s-%s' % (pid, i.number),
             'classes': ' '.join(['label-%s' % html_class(l.name)
                                  for l in i.labels
                                  if l.name.lower() not in label_ignore]),
@@ -80,19 +96,20 @@ def issue_lines(template, issues, indent='', label_ignore=[], dedup=False):
     return lines
 
 
-def issue_list(template, issues, indent='', **kwargs):
-    data = '\n'.join(issue_lines(template, issues,
+def issue_list(template, issues, pid='all', indent='', **kwargs):
+    data = '\n'.join(issue_lines(template, issues, pid,
                                  indent=indent+'   ', **kwargs))
     if not data:
         return ''
     return template['issues'] % {
         'indent': indent,
+        'unique_id': '%s-issues' % pid,
         'classes': '',
         'lines': data
     }
 
 
-def label_lines(template, issues, indent='', **kwargs):
+def label_lines(template, issues, pid, indent='', **kwargs):
     by_label = {'Unlabeled': [None, []]}
     ignored = kwargs.get('label_ignore') or []
     for i in issues:
@@ -107,29 +124,32 @@ def label_lines(template, issues, indent='', **kwargs):
     lines = []
     for lname in sorted(by_label.keys()):
         label, issues = by_label[lname]
-        data = issue_list(template, issues, indent=indent, **kwargs)
+        uid = '%s-%s' % (pid, html_class(lname))
+        data = issue_list(template, issues, pid=uid, indent=indent, **kwargs)
         if data:
             lines.append(template['label'] % {
                 'indent': indent,
+                'unique_id': uid,
                 'classes': 'label-%s' % html_class(lname),
                 'text': lname + ' ' + data
             })
     return lines
 
 
-def label_list(template, issues, indent='', **kwargs):
-    data = '\n'.join(label_lines(template, issues,
+def label_list(template, issues, pid='all', indent='', **kwargs):
+    data = '\n'.join(label_lines(template, issues, pid,
                                  indent=indent+'   ', **kwargs))
     if not data:
         return ''
     return template['labels'] % {
         'indent': indent,
+        'unique_id': '%s-labels' % pid,
         'classes': '',
         'lines': data
     }
 
 
-def milestone_lines(template, issues, indent='', **kwargs):
+def milestone_lines(template, issues, pid, indent='', **kwargs):
     by_milestone = {}
     for i in issues:
         milestone = i.milestone
@@ -143,23 +163,26 @@ def milestone_lines(template, issues, indent='', **kwargs):
     lines = []
     for mname in sorted(by_milestone.keys()):
         milestone, issues = by_milestone[mname]
-        data = label_list(template, issues, indent=indent, **kwargs)
+        uid = '%s-%s' % (pid, html_class(mname))
+        data = label_list(template, issues, pid=uid, indent=indent, **kwargs)
         if data:
             lines.append(template['stone'] % {
                 'indent': indent,
+                'unique_id': uid,
                 'classes': 'milestone-%s' % html_class(mname),
                 'text': mname + ' ' + data
             })
     return lines
 
 
-def milestone_list(template, issues, indent='', **kwargs):
-    data = '\n'.join(milestone_lines(template, issues,
+def milestone_list(template, issues, pid='all', indent='', **kwargs):
+    data = '\n'.join(milestone_lines(template, issues, pid,
                                      indent=indent+'   ', **kwargs))
     if not data:
         return ''
     return template['stones'] % {
         'indent': indent,
+        'unique_id': '%s-milestones' % pid,
         'classes': '',
         'lines': data
     }
@@ -198,7 +221,7 @@ try:
         label_arg = sys.argv[sys.argv.index('--label_ignore')+1]
         label_ignore = [l.lower().strip() for l in label_arg.split(',')]
     else:
-        label_ignore = None
+        label_ignore = []
 
     if '--milestone_filter' in sys.argv:
         stone_arg = sys.argv[sys.argv.index('--milestone_filter')+1]
