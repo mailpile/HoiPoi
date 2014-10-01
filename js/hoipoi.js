@@ -250,12 +250,12 @@ hoipoi = (function() {
                     // We have ballot data for this election!
                     var order = hoipoi.userinfo["election."+eid].split(",");
                     console.log("Found user preferences for election: ", order);
-                    e.children().sort(sort_li).appendTo(element);
                     function sort_li(a, b) {
                         a = $(a).data("issue").toString();
                         b = $(b).data("issue").toString();
                         return (order.indexOf(a) > order.indexOf(b)) ? 1 : -1;
                     }
+                    e.children().sort(sort_li).appendTo(element);
                 }
                 console.log("Making ranked election sortable");
                 e.sortable({
@@ -280,7 +280,7 @@ hoipoi = (function() {
         },
 
         create_single_choice_elections: function() {
-            $(".single-choice-election").each(function(i, e) {
+            $(".single-choice-election").find(".issue").each(function(i, e) {
                 var m = $(e);
                 var issue = m.data("issue");
                 var options = (m.data("options") || "yes,no").split(",");
@@ -291,7 +291,8 @@ hoipoi = (function() {
                         m.append("<a class=\"vote vote-" + val + "\"" +
                                  "   id=\"" + aid + "\"" +
                                  "   data-issue=\"" + issue + "\"" +
-                                 "   data-value=\"" + val + "\">" + val + "</a>");
+                                 "   data-value=\"" + val + "\">" + val +
+                                 "</a>");
                         $("#"+aid).click(function(e) {
                             var issue = $(e.target).data("issue");
                             var value = $(e.target).data("value");
