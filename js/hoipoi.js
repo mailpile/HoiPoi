@@ -57,7 +57,7 @@ hoipoi = (function() {
     };
 
     return {
-        site_info: {
+        default_site_info: {
             // Default settings...
             url_db: "/hoipoi/db/",       // Directory of user json
             url_up: "/cgi-bin/user-up.py",   // Path to update CGI script
@@ -97,8 +97,10 @@ hoipoi = (function() {
         // and checks the current cookie state to figure out whether
         // we're logged in or not.
         init: function(site_info) {
-            if (site_info) {
-                this.site_info = site_info;
+            this.site_info = {};
+            for (attr in this.default_site_info) {
+                this.site_info[attr] = ((site_info && site_info[attr]) ||
+                                        this.default_site_info[attr]);
             }
             this.username = _hashbrownie(hoipoi.site_info.cookie_user);
             this.token = _hashbrownie(hoipoi.site_info.cookie_token);
