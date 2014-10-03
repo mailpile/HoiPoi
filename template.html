@@ -9,7 +9,14 @@
     <script src="js/hoipoi.js"></script>
     <script>
         $(document).ready(function() {
-            hoipoi.init();
+            hoipoi.init({
+                callback_ranked_vote_ok: function() {
+                    alert('Stuff got ranked!');
+                },
+                callback_single_vote_ok: function() {
+                    alert('The vote got saved!');
+                }
+            });
         });
     </script>
 </head>

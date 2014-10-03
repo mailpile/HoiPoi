@@ -74,7 +74,16 @@ hoipoi = (function() {
             pyformat_vote: ("<a class='vote vote-%(vote)s' " +
                             "   id='%(id)s' " +
                             "   data-issue='%(issue)s' " +
-                            "   data-value='%(vote)s'>%(vote)s</a>")
+                            "   data-value='%(vote)s'>%(vote)s</a>"),
+
+            // Callbacks for specific events
+            callback_login_ok: null,
+            callback_login_error: null,
+            callback_logged_out: null,
+            callback_single_vote_ok: null,
+            callback_single_vote_error: null,
+            callback_ranked_vote_ok: null,
+            callback_ranked_vote_error: null
         },
         username: null,
         token: null,
@@ -151,7 +160,7 @@ hoipoi = (function() {
             hoipoi.remove_vote_buttons();
         },
 
-        _login_succeeded: function(userdata) {
+        _login_ok: function(userdata) {
             hoipoi.userinfo = userdata;
             $(hoipoi.site_info.dom_login_error).hide();
             $(hoipoi.site_info.dom_logout).show();
@@ -163,11 +172,21 @@ hoipoi = (function() {
             hoipoi.create_elections();
         },
 
+        _login_succeeded: function(userdata) {
+            hoipoi._login_ok(userdata);
+            if (hoipoi.site_info.callback_login_ok) {
+                hoipoi.site_info.callback_login_ok();
+            };
+        },
+
         _login_failed: function() {
             $(hoipoi.site_info.dom_logout).hide();
             $(hoipoi.site_info.dom_login).show();
             $(hoipoi.site_info.dom_login_error).show();
             hoipoi._clear_cookies();
+            if (hoipoi.site_info.callback_login_error) {
+                hoipoi.site_info.callback_login_error();
+            };
         },
 
         _load_userinfo: function() {
@@ -192,6 +211,9 @@ hoipoi = (function() {
             $(this.site_info.dom_login_error).hide();
             this._clear_userinfo();
             this._clear_cookies();
+            if (hoipoi.site_info.callback_logout) {
+                hoipoi.site_info.callback_logout();
+            };
         },
 
         user_set: function(variable, value, ok, fail) {
@@ -285,7 +307,10 @@ hoipoi = (function() {
                             issue_order.push(m.data("issue"));
                         });
                         var e = election.data("election");
-                        hoipoi.user_set("election." + e, issue_order.join(","));
+                        hoipoi.user_set("election." + e, issue_order.join(","),
+                            hoipoi.site_info.callback_ranked_vote_ok,
+                            hoipoi.site_info.callback_ranked_vote_error
+                        );
                         election.addClass("updating");
                         item.removeClass("dragged").removeAttr("style");
                         $("body").removeClass("dragging")
@@ -339,7 +364,10 @@ hoipoi = (function() {
         },
 
         cast_vote: function(issue, vote) {
-            this.user_set("vote." + issue, vote);
+            this.user_set("vote." + issue, vote,
+                hoipoi.site_info.callback_single_vote_ok,
+                hoipoi.site_info.callback_single_vote_error
+            );
         }
     };
 })();
