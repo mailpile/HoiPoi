@@ -211,8 +211,8 @@ hoipoi = (function() {
             $(this.site_info.dom_login_error).hide();
             this._clear_userinfo();
             this._clear_cookies();
-            if (hoipoi.site_info.callback_logout) {
-                hoipoi.site_info.callback_logout();
+            if (hoipoi.site_info.callback_logged_out) {
+                hoipoi.site_info.callback_logged_out();
             };
         },
 
