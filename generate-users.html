@@ -126,6 +126,9 @@
         }
 
         $(document).ready(function() {
+            hoipoi.init({
+                // Site-specific config goes here...
+            });
             $('#go').click(generate_output);
             $('#clear').click(clear_output);
             $('#makeusers').click(make_users);
