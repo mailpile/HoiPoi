@@ -3,7 +3,16 @@
  * This drops into pretty much any HTML page and can be configured to
  * display and register votes on whatever.
  */
+
 hoipoi = (function() {
+
+    // This adds python-style %(name)s placeholder replacement to the
+    // standard string class.
+    String.prototype.pyformat = function(vars) {
+        return this.replace(/\%\(([a-zA-Z_-]+)\)s/g, function(group, name) {
+            return vars[name];
+        });
+    };
 
     // This is a lossy encoding that will only modify the string once, no
     // matter how often you encode it. It is also guaranteed not to get
@@ -59,7 +68,13 @@ hoipoi = (function() {
             dom_login_error: ".login-error", // Selector for "login failed"
             dom_nickname: ".login-nickname", // Selector for user's name
             cookie_user: "username",         // Cookie to store user name
-            cookie_token: "token"            // Cookie to store token
+            cookie_token: "token",           // Cookie to store token
+
+            // Python-string style template for a voting button
+            pyformat_vote: ("<a class='vote vote-%(vote)s' " +
+                            "   id='%(id)s' " +
+                            "   data-issue='%(issue)s' " +
+                            "   data-value='%(vote)s'>%(vote)s</a>")
         },
         username: null,
         token: null,
@@ -288,11 +303,11 @@ hoipoi = (function() {
                     var val = options[o];
                     var aid = "vote-" + issue + "-" + val;
                     if (!$("#"+aid).length) {
-                        m.append("<a class=\"vote vote-" + val + "\"" +
-                                 "   id=\"" + aid + "\"" +
-                                 "   data-issue=\"" + issue + "\"" +
-                                 "   data-value=\"" + val + "\">" + val +
-                                 "</a>");
+                        m.append(hoipoi.site_info.pyformat_vote.pyformat({
+                            id: aid,
+                            vote: val,
+                            issue: issue
+                        }));
                         $("#"+aid).click(function(e) {
                             var issue = $(e.target).data("issue");
                             var value = $(e.target).data("value");
