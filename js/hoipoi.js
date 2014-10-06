@@ -298,6 +298,21 @@ hoipoi = (function() {
                 }
                 console.log("Making ranked election sortable");
                 e.sortable({
+/*
+                    containerSelector: 'ul',
+                    itemSelector: 'li',
+                    onDrag: function(item) {
+                        console.log('here inside onDrag');
+                    },
+                    onDragStart: function(item, group, _super) {
+                        oldIndex = item.index()
+                        item.appendTo(item.parent())
+                        _super(item)
+                    },
+*/
+                    placeholder: '<li class="dragging-placeholder">Move item to here</li>',
+
+                    vertical: false,
                     onDrop: function(item) {
                         var val = 0;
                         var issue_order = [];
