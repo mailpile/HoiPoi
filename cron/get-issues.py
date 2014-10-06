@@ -27,8 +27,8 @@ TEMPLATES = {
                   '<a href="%(url)s">%(text)s</a></li>'),
         'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
         'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
-        'issues': ('%(indent)s<ul class="issues %(classes)s">\n'
-                   '%(lines)s\n%(indent)s</ul>'),
+        'issues': ('%(indent)s<ol class="issues %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ol>'),
         'labels': ('%(indent)s<ul class="labels %(classes)s">\n'
                    '%(lines)s\n%(indent)s</ul>'),
         'stones': ('%(indent)s<ul class="milestones %(classes)s">\n'
@@ -40,8 +40,8 @@ TEMPLATES = {
                   '<a href="%(url)s">%(text)s</a></li>'),
         'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
         'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
-        'issues': ('%(indent)s<ul class="issues %(classes)s">\n'
-                   '%(lines)s\n%(indent)s</ul>'),
+        'issues': ('%(indent)s<ol class="issues %(classes)s">\n'
+                   '%(lines)s\n%(indent)s</ol>'),
         'labels': ('%(indent)s<ul class="labels %(classes)s">\n'
                    '%(lines)s\n%(indent)s</ul>'),
         'stones': ('%(indent)s<ul class="milestones vote-list %(classes)s">\n'
@@ -53,9 +53,9 @@ TEMPLATES = {
                   '<a href="%(url)s">%(text)s</a></li>'),
         'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
         'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
-        'issues': ('%(indent)s<ul class="issues ranked-election %(classes)s" '
+        'issues': ('%(indent)s<ol class="issues ranked-election %(classes)s" '
                    'data-election="%(unique_id)s">\n'
-                   '%(lines)s\n%(indent)s</ul>'),
+                   '%(lines)s\n%(indent)s</ol>'),
         'labels': ('%(indent)s<ul class="labels %(classes)s">\n'
                    '%(lines)s\n%(indent)s</ul>'),
         'stones': ('%(indent)s<ul class="milestones vote-list %(classes)s">\n'
