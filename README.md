@@ -70,6 +70,7 @@ Your HTML code should then look something like this:
 
         <div class="single-choice-election">
             <div class="issue" data-issue="30201" data-options="yes,no">
+                <div class="vote-options"></div>
                 <span class="issue-title"><a href="https://github.com/pagekite/Mailpile/issues/30201">The name of the issue</a></span>
                 <span class="issue-details">...</span>
             </div>

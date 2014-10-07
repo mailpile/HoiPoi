@@ -344,7 +344,8 @@ hoipoi = (function() {
                     var aid = "vote-" + issue + "-" + val;
                     if (!$("#"+aid).length) {
 
-                        m.append(hoipoi.site_info.template_vote.pyformat({
+                        // Inject Vote Buttons from Template
+                        $(e).find('.vote-options').append(hoipoi.site_info.template_vote.pyformat({
                             id: aid,
                             vote: val,
                             issue: issue
