@@ -70,7 +70,12 @@ hoipoi = (function() {
             cookie_user: "username",         // Cookie to store user name
             cookie_token: "token",           // Cookie to store token
             // Template for a voting button
-            template_vote: "<a class='vote vote-%(vote)s' id='%(id)s' data-issue='%(issue)s' data-value='%(vote)s'>%(vote)s</a>",
+            template_vote: ("<a class='vote vote-%(vote)s' id='%(id)s' " +
+                            "   data-issue='%(issue)s' " +
+                            "   data-value='%(vote)s'>%(vote)s</a>"),
+            // Template for the placeholder during a drag/drop activity
+            template_drag_placeholder: ("<li class='dragging-placeholder'>" +
+                                        "Move item to here</li>"),
             // Callbacks for specific events
             callback_login_ok: null,
             callback_login_error: null,
@@ -305,8 +310,7 @@ hoipoi = (function() {
                         _super(item)
                     },
 */
-                    placeholder: '<li class="dragging-placeholder">Move item to here</li>',
-
+                    placeholder: hoipoi.site_info.template_drag_placeholder,
                     vertical: false,
                     onDrop: function(item) {
                         var val = 0;
