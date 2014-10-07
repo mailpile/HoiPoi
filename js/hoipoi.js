@@ -347,12 +347,17 @@ hoipoi = (function() {
                     var val = options[o];
                     var aid = "vote-" + issue + "-" + val;
                     if (!$("#"+aid).length) {
+                        // If a .vote-options container exists, add to that.
+                        var vo = m.find('.vote-options');
+                        if (vo.length) {
+                            m = vo;
+                        }
 
                         // Inject Vote Buttons from Template
-                        $(e).find('.vote-options').append(hoipoi.site_info.template_vote.pyformat({
-                            id: aid,
-                            vote: val,
-                            issue: issue
+                        m.append(hoipoi.site_info.template_vote.pyformat({
+                                id: aid,
+                                vote: val,
+                                issue: issue
                         }));
 
                         // Click Element to Vote
