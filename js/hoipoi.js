@@ -69,13 +69,8 @@ hoipoi = (function() {
             dom_nickname: ".login-nickname", // Selector for user's name
             cookie_user: "username",         // Cookie to store user name
             cookie_token: "token",           // Cookie to store token
-
-            // Python-string style template for a voting button
-            pyformat_vote: ("<a class='vote vote-%(vote)s' " +
-                            "   id='%(id)s' " +
-                            "   data-issue='%(issue)s' " +
-                            "   data-value='%(vote)s'>%(vote)s</a>"),
-
+            // Template for a voting button
+            template_vote: "<a class='vote vote-%(vote)s' id='%(id)s' data-issue='%(issue)s' data-value='%(vote)s'>%(vote)s</a>",
             // Callbacks for specific events
             callback_login_ok: null,
             callback_login_error: null,
@@ -338,18 +333,24 @@ hoipoi = (function() {
 
         create_single_choice_elections: function() {
             $(".single-choice-election").find(".issue").each(function(i, e) {
+
                 var m = $(e);
                 var issue = m.data("issue");
                 var options = (m.data("options") || "yes,no").split(",");
+
+                // Loop Through Voting Options
                 for (o in options) {
                     var val = options[o];
                     var aid = "vote-" + issue + "-" + val;
                     if (!$("#"+aid).length) {
-                        m.append(hoipoi.site_info.pyformat_vote.pyformat({
+
+                        m.append(hoipoi.site_info.template_vote.pyformat({
                             id: aid,
                             vote: val,
                             issue: issue
                         }));
+
+                        // Click Element to Vote
                         $("#"+aid).click(function(e) {
                             var issue = $(e.target).data("issue");
                             var value = $(e.target).data("value");
@@ -364,6 +365,7 @@ hoipoi = (function() {
             });
 
             $(".vote").removeClass("selected").removeClass("selecting");
+
             for (i in this.userinfo) {
                 if (i.indexOf("vote") == 0) {
                     var issue = i.substring(5);
