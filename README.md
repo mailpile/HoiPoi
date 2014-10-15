@@ -176,6 +176,6 @@ Currently there is only one tallying method supplied, a Schulze Proportional Rep
 
 ## Copyright & License
 
-Copyright 2014, Bjarni R. Einarsson, Smári McCarthy, Mailpile ehf
+Copyright 2014, Bjarni R. Einarsson, Smári McCarthy, Brennan Novak, Mailpile ehf
 
 Released under the MIT license.
