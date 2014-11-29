@@ -49,7 +49,8 @@ TEMPLATES = {
     },
     'hoipoi-ranked': {
         'issue': ('%(indent)s'
-                  '<li class="issue %(classes)s"'
+                  '<li class="issue state-%(state)s %(classes)s"'
+                  ' data-state="%(state)s"'
                   ' data-labels="%(labels)s"'
                   ' data-comments="%(comments)s"'
                   ' data-issue="%(number)s">'
@@ -112,6 +113,7 @@ def issue_lines(template, issues, pid,
             'labels': ', '.join([html_class(l.name) for l in labels]),
             'number': entity_encode(i.number),
             'url': clean_url(i.html_url),
+            'state': entity_encode(i.state),
             'title': entity_encode(i.title),
             'summary': summary,
             'comments': entity_encode(i.comments),
@@ -245,7 +247,7 @@ try:
 
     issues = None
     if '--all' in sys.argv:
-        issue_args = {}
+        issue_args = {'state': 'all'}
     elif '--closed' in sys.argv:
         issue_args = {'state': 'closed'}
     else:
@@ -268,8 +270,8 @@ try:
         stone_arg = sys.argv[sys.argv.index('--milestone_filter')+1]
         stone_filter = set([l.lower().strip() for l in stone_arg.split(',')])
         issues = issues or repo.get_issues(**issue_args)
-        issues = [i for i in issues
-                  if i.milestone and (i.milestone.name.lower() in stone_filter)]
+        issues = [i for i in issues if i.milestone
+                  and (i.milestone.name.lower() in stone_filter)]
     else:
         stone_filter = None
 
