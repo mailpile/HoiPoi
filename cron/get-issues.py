@@ -49,8 +49,14 @@ TEMPLATES = {
     },
     'hoipoi-ranked': {
         'issue': ('%(indent)s'
-                  '<li class="issue %(classes)s" data-issue="%(number)s">'
-                  '<a href="%(url)s">%(text)s</a></li>'),
+                  '<li class="issue %(classes)s"'
+                  ' data-labels="%(labels)s"'
+                  ' data-comments="%(comments)s"'
+                  ' data-issue="%(number)s">'
+                  '<h6 class="title">%(title)s</h6>'
+                  ' <span class="summary">%(summary)s</span>'
+                  ' <a class="more" href="%(url)s">see conversation</a>'
+                  '</li>'),
         'label': '%(indent)s<li class="label %(classes)s">%(text)s</li>',
         'stone': '%(indent)s<li class="milestone %(classes)s">%(text)s</li>',
         'issues': ('%(indent)s<ol class="issues ranked-election %(classes)s" '
@@ -74,6 +80,20 @@ def safe_print(text):
     print text.encode('utf-8')
 
 
+def clean_url(t):
+    t = t.replace('"', '%22').replace("'", '%27')  # Breaks HTML
+    t = t.replace('<', '%3C').replace('>', '%3E')  # Breaks HTML
+    t = t.replace('(', '%28').replace(')', '%28')  # Breaks markdown
+    t = t.replace('[', '%5B').replace(']', '%5D')  # Breaks markdown
+    return t
+
+
+def entity_encode(t):
+    t = unicode(t)
+    t = t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    return t
+
+
 def issue_lines(template, issues, pid,
                 indent='', label_ignore=[], dedup=False):
     lines = []
@@ -81,15 +101,22 @@ def issue_lines(template, issues, pid,
     for i in issues:
         if dedup and i in dedup:
             continue
+        body = entity_encode(i.body)
+        summary = body.split('\n')[0]
+        labels = [l for l in i.labels if l.name.lower() not in label_ignore]
         lines.append(template['issue'] % {
             'indent': indent,
-            'unique_id': '%s-%s' % (pid, i.number),
+            'unique_id': '%s-%s' % (pid, entity_encode(i.number)),
             'classes': ' '.join(['label-%s' % html_class(l.name)
-                                 for l in i.labels
-                                 if l.name.lower() not in label_ignore]),
-            'number': i.number,
-            'text': i.title,
-            'url': i.html_url
+                                 for l in labels]),
+            'labels': ', '.join([html_class(l.name) for l in labels]),
+            'number': entity_encode(i.number),
+            'url': clean_url(i.html_url),
+            'title': entity_encode(i.title),
+            'summary': summary,
+            'comments': entity_encode(i.comments),
+            'body': body,
+            'text': entity_encode(i.title),
         })
         if dedup:
             dedup.append(i)
@@ -109,11 +136,13 @@ def issue_list(template, issues, pid='all', indent='', **kwargs):
     }
 
 
-def label_lines(template, issues, pid, indent='', **kwargs):
+def label_lines(template, issues, pid, indent='', label_want=None, **kwargs):
     by_label = {'Unlabeled': [None, []]}
     ignored = kwargs.get('label_ignore') or []
     for i in issues:
-        labels = [l for l in i.labels if l.name.lower() not in ignored]
+        labels = [l for l in i.labels
+                  if (l.name.lower() not in ignored) and
+                     ((not label_want) or l.name.lower() in label_want)]
         if not labels:
             by_label['Unlabeled'][1].append(i)
         for label in labels:
@@ -131,14 +160,19 @@ def label_lines(template, issues, pid, indent='', **kwargs):
                 'indent': indent,
                 'unique_id': uid,
                 'classes': 'label-%s' % html_class(lname),
-                'text': lname + ' ' + data
+                'title': entity_encode(lname),
+                'summary': '',  # FIXME
+                'body': data,
+                'text': entity_encode(lname) + ' ' + data
             })
     return lines
 
 
-def label_list(template, issues, pid='all', indent='', **kwargs):
+def label_list(template, issues,
+               pid='all', indent='', label_want=None, **kwargs):
     data = '\n'.join(label_lines(template, issues, pid,
-                                 indent=indent+'   ', **kwargs))
+                                 indent=indent+'   ', label_want=label_want,
+                                 **kwargs))
     if not data:
         return ''
     return template['labels'] % {
@@ -149,7 +183,8 @@ def label_list(template, issues, pid='all', indent='', **kwargs):
     }
 
 
-def milestone_lines(template, issues, pid, indent='', **kwargs):
+def milestone_lines(template, issues, roadmap_labels, pid,
+                    indent='', **kwargs):
     by_milestone = {}
     for i in issues:
         milestone = i.milestone
@@ -164,19 +199,25 @@ def milestone_lines(template, issues, pid, indent='', **kwargs):
     for mname in sorted(by_milestone.keys()):
         milestone, issues = by_milestone[mname]
         uid = '%s-%s' % (pid, html_class(mname))
-        data = label_list(template, issues, pid=uid, indent=indent, **kwargs)
+        data = label_list(template, issues,
+                          pid=uid, indent=indent, label_want=roadmap_labels,
+                          **kwargs)
         if data:
             lines.append(template['stone'] % {
                 'indent': indent,
                 'unique_id': uid,
                 'classes': 'milestone-%s' % html_class(mname),
-                'text': mname + ' ' + data
+                'title': entity_encode(mname),
+                'summary': '',  # FIXME
+                'body': data,
+                'text': entity_encode(mname) + ' ' + data
             })
     return lines
 
 
-def milestone_list(template, issues, pid='all', indent='', **kwargs):
-    data = '\n'.join(milestone_lines(template, issues, pid,
+def milestone_list(template, issues, roadmap_labels,
+                   pid='all', indent='', **kwargs):
+    data = '\n'.join(milestone_lines(template, issues, roadmap_labels, pid,
                                      indent=indent+'   ', **kwargs))
     if not data:
         return ''
@@ -232,6 +273,12 @@ try:
     else:
         stone_filter = None
 
+    if '--roadmap_labels' in sys.argv:
+        label_arg = sys.argv[sys.argv.index('--roadmap_labels')+1]
+        roadmap_labels = [l.lower().strip() for l in label_arg.split(',')]
+    else:
+        roadmap_labels = None
+
     kwargs = {
         'dedup': ['yup'] if '--dedup' in sys.argv else False,
         'label_ignore': label_ignore
@@ -246,7 +293,7 @@ try:
 
     if '--roadmap' in sys.argv:
         issues = issues or repo.get_issues(**issue_args)
-        safe_print(milestone_list(template, issues, **kwargs))
+        safe_print(milestone_list(template, issues, roadmap_labels, **kwargs))
 
     if '-i' in sys.argv:
         run_shell()
