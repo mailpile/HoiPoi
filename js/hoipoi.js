@@ -5,6 +5,7 @@
  */
 
 hoipoi = (function() {
+    var $ = jQuery;
 
     // This adds python-style %(name)s placeholder replacement to the
     // standard string class.
@@ -69,6 +70,7 @@ hoipoi = (function() {
             dom_nickname: ".login-nickname", // Selector for user's name
             cookie_user: "username",         // Cookie to store user name
             cookie_token: "token",           // Cookie to store token
+            cookie_path: "/",                // Cookie path
             // Template for a voting button
             template_vote: ("<a class='vote vote-%(vote)s' id='%(id)s' " +
                             "   data-issue='%(issue)s' " +
@@ -148,8 +150,9 @@ hoipoi = (function() {
         },
 
         _clear_cookies: function() {
-            $.cookie(hoipoi.site_info.cookie_user, "", {expires: 0});
-            $.cookie(hoipoi.site_info.cookie_token, "", {expires: 0});
+            var how = {path: hoipoi.site_info.cookie_path, expires: 0};
+            $.cookie(hoipoi.site_info.cookie_user, "", how);
+            $.cookie(hoipoi.site_info.cookie_token, "", how);
         },
 
         _clear_userinfo: function() {
@@ -166,9 +169,10 @@ hoipoi = (function() {
             $(hoipoi.site_info.dom_logout).show();
             $(hoipoi.site_info.dom_login).hide();
             $(hoipoi.site_info.dom_nickname).html(userdata.nickname);
-            $.cookie(hoipoi.site_info.cookie_user, hoipoi.username);
+            $.cookie(hoipoi.site_info.cookie_user, hoipoi.username,
+                     {path: hoipoi.site_info.cookie_path});
             $.cookie(hoipoi.site_info.cookie_token, hoipoi.token,
-                     {expires: 10});
+                     {path: hoipoi.site_info.cookie_path, expires: 8 * 3600});
             hoipoi.create_elections();
         },
 
