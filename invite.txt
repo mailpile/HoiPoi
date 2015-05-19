@@ -8,7 +8,7 @@ Please click this link to join: <%(login_url)s>
 Your details:
 
     username: %(mailto)s
-    password: %(password)s
+    temporary password: %(password)s
 
 You should be able to change both the username and the password once you
 have logged in.
