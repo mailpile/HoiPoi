@@ -8,6 +8,7 @@
     <script src="js/hoipoi.js"></script>
     <script>
         var login_page = 'http://localhost/hoipoi/template.html';
+        var seeded = 0;
 
         function generate_output() {
             var input = $('#input').val().match(/[^\r\n,]+/g);
@@ -52,9 +53,12 @@
             $('#nothing-yet').hide();
             $('#go').hide();
 
-            sjcl.random.addEntropy(randcrap);
+            if (!seeded) {
+              sjcl.random.addEntropy(randcrap);
+              seeded = 1;
+            }
             var hexdump = sjcl.codec.hex.fromBits;
-            var countdown = 3;
+            var countdown = 25;
             var unfinished = '';
             for (var u in users) {
                 countdown -= 1;
@@ -80,7 +84,7 @@
                 }
             }
             if ($('#makeusers-auth').val()) {
-                setTimeout('make_users();', 100);
+                make_users();
             }
             if (unfinished) {
                 $('#input').val(unfinished);
